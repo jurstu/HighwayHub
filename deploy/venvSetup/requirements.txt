@@ -1,0 +1,11 @@
+opencv-python
+nicegui
+flask
+python-can
+colorlog
+pyserial
+pynmea2
+pytz
+timezonefinder
+pyubx2
+requests
