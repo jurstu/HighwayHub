@@ -1,0 +1,4 @@
+{
+    "gpsPortPath": "/dev/ttyUSB0",
+    "gpsPortSpeed": 9600
+}
