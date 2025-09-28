@@ -4,5 +4,6 @@
     "firstVideoSettings": {
         "hh": 720,
         "ww": 1280
-    }
+    },
+    "trail length": 30
 }

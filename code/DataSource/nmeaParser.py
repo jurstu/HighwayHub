@@ -33,6 +33,7 @@ class NmeaParser:
         }
         self.lastRxTime = 0
         self.newPositionSignal = Signal("new position signal")
+        
 
     def newMsg(self, data):
         try:
@@ -42,7 +43,7 @@ class NmeaParser:
             pass
 
     def __repr__(self):
-        output = "sats={:02d}, lat={:02.4f}, lat={:02.4f}, time={}".format(self.status.numSats, self.status.lat, self.status.lon, self.status.UTCTime.strftime("%Y-%m-%d %H:%M"))
+        output = "sats={:02d}, lat={:02.4f}, lat={:02.4f}, time={}".format(self.status.numSats, self.status.lat, self.status.lon, self.status.UTCTime.strftime("%Y-%m-%d %H:%M:%S:%f"))
         return output
 
     def getStatus(self):
@@ -117,9 +118,6 @@ class NmeaParser:
         return decimal
 
     def msgRMCHandler(self, message):
-        # logger.info("RMC Message")
-        # logger.info(message.render())
-        # logger.info(repr(message))
         RMCGood = message.status == "A"  # A-ctive, V-oid
         self.status.RMCGood = RMCGood
         if RMCGood:
@@ -128,9 +126,10 @@ class NmeaParser:
             timedate = message.timestamp
             datedate = message.datestamp
             UTC = datetime.datetime.combine(datedate, timedate)
-            self.status.UTC = UTC
+            self.status.UTCTime = UTC
             self.status.lat = lat
             self.status.lon = lon
+            self.newPositionSignal.trigger(self.status)
 
         NAVGood = message.nav_status == "V"  # V-alid
         self.status.NAVGood = NAVGood

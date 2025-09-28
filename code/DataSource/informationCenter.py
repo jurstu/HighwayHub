@@ -24,6 +24,8 @@ class InformationCenter:
         self.setValue("PARAMS", getJson("./params.json"))
         self.setValue("car-centered", True)
         self.setValue("last gps update ts", 0)
+        self.setValue("recentPositionsList", [])
+    
 
     def getValue(self, valueName, defaultValue=None):
         if valueName in self.theDict:

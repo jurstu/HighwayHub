@@ -65,8 +65,9 @@ class UiGen:
             self.controls["GPS card"].classes("px-4 py-1 rounded bg-red-500")
         else:
             self.controls["GPS card"].classes("px-4 py-1 rounded bg-green-500")
-            self.controls[f"GPS card lat"].text = "{:03.5f}".format(data.lat)
-            self.controls[f"GPS card lon"].text = "{:03.5f}".format(data.lon)
+            self.controls[f"GPS card lat"].text = "{:03.5f}°".format(data.lat)
+            self.controls[f"GPS card lon"].text = "{:03.5f}°".format(data.lon)
+            self.controls[f"GPS card alt"].text = "{:03.5f}m".format(data.alt)
 
             cc = self.ic.getValue("car-centered", False)
             if(cc):
@@ -77,18 +78,35 @@ class UiGen:
                 self.controls["carMarker"].run_method(':setIcon', 'L.icon({iconUrl: "/car.png", iconSize: [32, 32], iconAnchor: [16, 16]})')
             else:
                 self.controls["carMarker"].move(data.lat, data.lon)
-                #self.controls["carMarker"].run_method(":setRotationOrigin", "center center")
                 self.controls["carMarker"].run_method(':setRotationAngle', "{:d}".format(data.COG))
                 self.controls["carMarker"].run_method(':setIcon', 'L.icon({iconUrl: "/car.png", iconSize: [32, 32], iconAnchor: [16, 16]})')
 
+        self.updatePath()
+
+    def updatePath(self):
+        recentPaths = self.ic.getValue("recentPositionsList")
+        positions = []
+        speeds = []
+        alts = []
+
+        for data in recentPaths:
+            positions.append([data.lat, data.lon])
+            speeds.append([data.SOG, data.COG])
+            alts.append(data.alt)
+
+        if("trace" in self.controls):
+           self.controls["theMap"].remove_layer(self.controls["trace"])
+           
+
+        self.controls["trace"] = self.controls["theMap"].generic_layer(name='polyline', args=[positions, {"color": "red"}]) 
+        self.controls["elevationChart"].options['series'][0]['data'] = alts
+        self.controls["elevationChart"].update()
 
 
 
     def spawnGui(self):
         dark = ui.dark_mode()
         dark.enable()
-
-        
 
         # with ui.header().classes("bg-gray-800 text-white justify-between p-2"):
         with ui.footer().classes("bg-gray-800 text-white p-2 items-stretch"):  # force vertical stretch
@@ -100,12 +118,31 @@ class UiGen:
                         self.controls[f"GPS card StatusLab"] = ui.label(f"{'GPS card'} STATUS")
                         self.controls[f"GPS card lat"] = ui.label("")
                         self.controls[f"GPS card lon"] = ui.label("")
-                        
+                        self.controls[f"GPS card alt"] = ui.label("")
+
 
         with ui.column().classes('w-full max-w-[1280px] mx-auto flex-1'):
             self.controls["theMap"] = ui.leaflet(additional_resources=[
                 '/rotatedMarker.js'
             ]).classes('w-full h-[calc(33vh)]')
+
+            with ui.card().classes('w-full bg-gray-100 h-[calc(33vh)]'):
+                self.controls["elevationChart"] = ui.echart({
+                    "animation": False,
+                    "legend": {"data": ["elevation [m]"]},
+                    "xAxis": {"type": "category"},
+                    "yAxis": {
+                        "type": "value",
+                        "scale": True,
+                        "axisLabel": {
+                            #":formatter": "function (value) { return Number.isInteger(value) ? value : ''; }"
+                        },
+                    },
+                    "series": [
+                        {"name": "elevation [m]", "color": "blue", "type": "line", "data": []}
+                    ],
+                }).classes("w-full h-full")
+                
         
         ui.timer(interval=0.033, callback=self.updateAtVideoRate)
         ui.timer(interval=2, callback=self.fiveSecondRate)
@@ -113,7 +150,6 @@ class UiGen:
         @app.get("/video/frame", response_class=Response)
         def grabVideoFrame() -> Response:
             return Response(content=self.state.latestFrameJpeg, media_type="image/jpg")
-
 
         @app.get("/car.png")
         def serve_dynamic_image():
