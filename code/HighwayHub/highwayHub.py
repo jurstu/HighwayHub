@@ -2,6 +2,7 @@ import time
 
 from DataSource import InformationCenter, GpsHandler
 from LoggingSetup import getLogger
+from UiGen import UiGen
 
 
 logger = getLogger(__name__)
@@ -11,6 +12,10 @@ class HighwayHub:
         self.printMotd()
         self.ic = InformationCenter()
         self.gpsHandler = GpsHandler()
+        self.uiGen = UiGen()
+        self.uiGen.run()
+        self.gpsHandler.nmeaParser.newPositionSignal.addReceiver(self.uiGen.updateGpsData)
+
 
     def printMotd(self):
         logger.debug("Welcome, to HighwayHub")

@@ -56,6 +56,8 @@ def isIPValid(ip):
     return output
 
 
+
+
 def getSerialPortsAvailable():
     devices = os.listdir("/dev/")
     outList = []

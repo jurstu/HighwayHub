@@ -22,6 +22,8 @@ class InformationCenter:
         logger.info("init values at information center")
 
         self.setValue("PARAMS", getJson("./params.json"))
+        self.setValue("car-centered", True)
+        self.setValue("last gps update ts", 0)
 
     def getValue(self, valueName, defaultValue=None):
         if valueName in self.theDict:

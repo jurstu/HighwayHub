@@ -1,4 +1,8 @@
 {
     "gpsPortPath": "/dev/ttyUSB0",
-    "gpsPortSpeed": 9600
+    "gpsPortSpeed": 9600,
+    "firstVideoSettings": {
+        "hh": 720,
+        "ww": 1280
+    }
 }

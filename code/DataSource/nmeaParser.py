@@ -86,13 +86,16 @@ class NmeaParser:
         # logger.info("GGA Message" + repr(message))
 
         self.status.fix = message.gps_qual
+
         if self.status.fix:
             self.status.numSats = int(message.num_sats)
             self.status.alt = message.altitude
             self.status.horizontalDil = message.horizontal_dil
             self.status.lat = self.dmmToDecimal(message.lat, message.lat_dir)
             self.status.lon = self.dmmToDecimal(message.lon, message.lon_dir)
-            self.newPositionSignal.trigger(self.status)
+
+        self.newPositionSignal.trigger(self.status)
+
 
 
     def msgVTGHandler(self, message):
