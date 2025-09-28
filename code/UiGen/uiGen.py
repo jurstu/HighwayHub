@@ -1,5 +1,6 @@
 from nicegui import ui, events, app
 from fastapi import Response
+from fastapi.responses import FileResponse
 import os
 import time
 from Util import EmptyClass, StdoutInterceptor
@@ -70,6 +71,16 @@ class UiGen:
             cc = self.ic.getValue("car-centered", False)
             if(cc):
                 self.controls["theMap"].set_center((data.lat, data.lon))
+            
+            if(not "carMarker" in self.controls):
+                self.controls["carMarker"] = self.controls["theMap"].marker(latlng=(data.lat, data.lon), options={'rotationAngle': data.COG, "rotationOrigin": "center center"})
+                self.controls["carMarker"].run_method(':setIcon', 'L.icon({iconUrl: "/car.png", iconSize: [32, 32], iconAnchor: [16, 16]})')
+            else:
+                self.controls["carMarker"].move(data.lat, data.lon)
+                #self.controls["carMarker"].run_method(":setRotationOrigin", "center center")
+                self.controls["carMarker"].run_method(':setRotationAngle', "{:d}".format(data.COG))
+                self.controls["carMarker"].run_method(':setIcon', 'L.icon({iconUrl: "/car.png", iconSize: [32, 32], iconAnchor: [16, 16]})')
+
 
 
 
@@ -91,8 +102,10 @@ class UiGen:
                         self.controls[f"GPS card lon"] = ui.label("")
                         
 
-        with ui.column().classes('w-full max-w-[1280px] mx-auto'):
-            self.controls["theMap"] = ui.leaflet()
+        with ui.column().classes('w-full max-w-[1280px] mx-auto flex-1'):
+            self.controls["theMap"] = ui.leaflet(additional_resources=[
+                '/rotatedMarker.js'
+            ]).classes('w-full h-[calc(33vh)]')
         
         ui.timer(interval=0.033, callback=self.updateAtVideoRate)
         ui.timer(interval=2, callback=self.fiveSecondRate)
@@ -101,6 +114,14 @@ class UiGen:
         def grabVideoFrame() -> Response:
             return Response(content=self.state.latestFrameJpeg, media_type="image/jpg")
 
+
+        @app.get("/car.png")
+        def serve_dynamic_image():
+            return FileResponse("./assets/car.png", media_type='image/png')
+
+        @app.get("/rotatedMarker.js")
+        def serve_dynamic_image():
+            return FileResponse("./UiGen/leaflet.rotatedMarker.js", media_type='text/javascript')
 
 if __name__ == "__main__":
     from .uiGen import UiGen

@@ -26,5 +26,3 @@ class GpsHandler:
 
         self.ic.setValue("last gps update ts", time.time())
 
-
-
