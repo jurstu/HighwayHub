@@ -9,3 +9,4 @@ pytz
 timezonefinder
 pyubx2
 requests
+smbus

@@ -18,4 +18,4 @@ class Signal:
                 else:
                     rx()
             except Exception as ex:
-                logger.error("error at signalling", ex)
+                logger.error(f"error at signal {self.name}", ex)

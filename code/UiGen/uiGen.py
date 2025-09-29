@@ -57,6 +57,19 @@ class UiGen:
             a.fix = False
             self.updateGpsData(a)
 
+
+    def updateBatteryData(self, data):
+        self.controls["BATT card"].classes(remove="bg-green-500 bg-yellow-500 bg-red-500 bg-slate-500")
+        self.controls[f"BATT card percent"].text = "{: 2d}%".format(data.battPercent)
+        self.controls[f"BATT card status"].text = "{}".format(data.chargingStatus)
+        perc = data.battPercent
+        if(perc > 50):
+            self.controls["BATT card"].classes("px-4 py-1 rounded bg-green-500")
+        elif(perc > 20):
+            self.controls["BATT card"].classes("px-4 py-1 rounded bg-yellow-500")
+        else:
+            self.controls["BATT card"].classes("px-4 py-1 rounded bg-red-500")
+
     def updateGpsData(self, data):
         self.controls["GPS card"].classes(remove="bg-green-500 bg-yellow-500 bg-red-500 bg-slate-500")
 
@@ -65,9 +78,9 @@ class UiGen:
             self.controls["GPS card"].classes("px-4 py-1 rounded bg-red-500")
         else:
             self.controls["GPS card"].classes("px-4 py-1 rounded bg-green-500")
-            self.controls[f"GPS card lat"].text = "{:03.5f}°".format(data.lat)
-            self.controls[f"GPS card lon"].text = "{:03.5f}°".format(data.lon)
-            self.controls[f"GPS card alt"].text = "{:03.5f}m".format(data.alt)
+            self.controls[f"GPS card lat"].text = "{: 3.5f}°".format(data.lat)
+            self.controls[f"GPS card lon"].text = "{: 3.5f}°".format(data.lon)
+            self.controls[f"GPS card alt"].text = "{: 3.1f}m".format(data.alt)
 
             cc = self.ic.getValue("car-centered", False)
             if(cc):
@@ -113,12 +126,22 @@ class UiGen:
             with ui.row().classes("w-full items-stretch"):
                 with ui.card().classes("h-full px-4 rounded bg-slate-500") as card:
                     self.controls["GPS card"] = card
-                    with ui.column().style("gap: 0.1rem").classes("h-full") as col:
+                    with ui.column().style("gap: 0.1rem").classes("h-full items-center justify-center") as col:
                         self.controls[f"GPS card StatusCol"] = col
                         self.controls[f"GPS card StatusLab"] = ui.label(f"{'GPS card'} STATUS")
                         self.controls[f"GPS card lat"] = ui.label("")
                         self.controls[f"GPS card lon"] = ui.label("")
                         self.controls[f"GPS card alt"] = ui.label("")
+                with ui.card().classes("h-full px-4 rounded bg-slate-500 flex items-center justify-center") as card:
+                    self.controls["BATT card"] = card
+                    with ui.column().style("gap: 0.1rem").classes("h-full items-center justify-center") as col:
+                        self.controls[f"BATT card StatusCol"] = col
+                        self.controls[f"BATT card StatusLab"] = ui.label("BATTERY STATUS")
+                        self.controls[f"BATT card percent"] = ui.label("")
+                        self.controls[f"BATT card status"] = ui.label("")
+                        self.controls[f"BATT card noneLabel"] = ui.label("")
+
+                        
 
 
         with ui.column().classes('w-full max-w-[1280px] mx-auto flex-1'):

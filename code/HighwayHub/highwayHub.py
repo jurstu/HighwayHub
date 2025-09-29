@@ -1,6 +1,6 @@
 import time
 
-from DataSource import InformationCenter, GpsHandler
+from DataSource import InformationCenter, GpsHandler, BatteryMonitor
 from LoggingSetup import getLogger
 from UiGen import UiGen
 
@@ -12,9 +12,12 @@ class HighwayHub:
         self.printMotd()
         self.ic = InformationCenter()
         self.gpsHandler = GpsHandler()
+        self.battMonitor = BatteryMonitor()
+        
         self.uiGen = UiGen()
         self.uiGen.run()
         self.gpsHandler.nmeaParser.newPositionSignal.addReceiver(self.uiGen.updateGpsData)
+        self.battMonitor.battDataUpdateSignal.addReceiver(self.uiGen.updateBatteryData)
 
 
     def printMotd(self):
@@ -26,4 +29,5 @@ class HighwayHub:
 
     def run(self):
         while(1):
+            self.battMonitor.updateData()
             time.sleep(1)
