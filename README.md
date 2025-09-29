@@ -16,7 +16,7 @@ Code for an embedded device in a car ;)
     - [ ] last 800m highest and lowest space 
 
 - [ ] camera on the back
-    - [ ] video on nicegui
+    - [X] video on nicegui
     - [ ] plate recognition
     - [ ] snapshots of cars+drivers
     - [ ] recording, maybe
