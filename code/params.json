@@ -3,7 +3,8 @@
     "gpsPortSpeed": 9600,
     "firstVideoSettings": {
         "hh": 720,
-        "ww": 1280
+        "ww": 1280,
+        "cameraPath": "/dev/video0"
     },
     "trail length": 30
 }

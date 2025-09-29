@@ -10,3 +10,5 @@ timezonefinder
 pyubx2
 requests
 smbus
+pycairo 
+PyGObject==3.50.0

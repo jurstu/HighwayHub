@@ -12,6 +12,8 @@ import base64
 from LoggingSetup import getLogger
 from DataSource import InformationCenter
 import json
+from .carListPage import CarListPage
+from .videoLivePage import VideoLivePage
 
 logger = getLogger(__name__)
 
@@ -25,7 +27,10 @@ class UiGen:
 
 
         self.controls = {}
-        self.spawnGui()
+        ui.page('/')(self.spawnGui)()
+        self.carListPage = CarListPage()
+        self.videoPage = VideoLivePage()
+
         self.loadSettingsFromParams(self.ic.getValue("PARAMS"))
 
     def run(self):
@@ -69,6 +74,9 @@ class UiGen:
             self.controls["BATT card"].classes("px-4 py-1 rounded bg-yellow-500")
         else:
             self.controls["BATT card"].classes("px-4 py-1 rounded bg-red-500")
+        
+        self.carListPage.updateBatteryData(data)
+        self.videoPage.updateBatteryData(data)
 
     def updateGpsData(self, data):
         self.controls["GPS card"].classes(remove="bg-green-500 bg-yellow-500 bg-red-500 bg-slate-500")
@@ -86,15 +94,22 @@ class UiGen:
             if(cc):
                 self.controls["theMap"].set_center((data.lat, data.lon))
             
-            if(not "carMarker" in self.controls):
+            try:
+                if(not "carMarker" in self.controls):
+                    self.controls["carMarker"] = self.controls["theMap"].marker(latlng=(data.lat, data.lon), options={'rotationAngle': data.COG, "rotationOrigin": "center center"})
+                    self.controls["carMarker"].run_method(':setIcon', 'L.icon({iconUrl: "/car.png", iconSize: [32, 32], iconAnchor: [16, 16]})')
+                else:
+                    self.controls["carMarker"].move(data.lat, data.lon)
+                    self.controls["carMarker"].run_method(':setRotationAngle', "{:d}".format(data.COG))
+                    self.controls["carMarker"].run_method(':setIcon', 'L.icon({iconUrl: "/car.png", iconSize: [32, 32], iconAnchor: [16, 16]})')
+            except Exception as e:
+                logger.warning(f"problem at the car - marker {e}")
                 self.controls["carMarker"] = self.controls["theMap"].marker(latlng=(data.lat, data.lon), options={'rotationAngle': data.COG, "rotationOrigin": "center center"})
-                self.controls["carMarker"].run_method(':setIcon', 'L.icon({iconUrl: "/car.png", iconSize: [32, 32], iconAnchor: [16, 16]})')
-            else:
-                self.controls["carMarker"].move(data.lat, data.lon)
-                self.controls["carMarker"].run_method(':setRotationAngle', "{:d}".format(data.COG))
                 self.controls["carMarker"].run_method(':setIcon', 'L.icon({iconUrl: "/car.png", iconSize: [32, 32], iconAnchor: [16, 16]})')
 
         self.updatePath()
+        self.carListPage.updateGpsData(data)
+        self.videoPage.updateGpsData(data)
 
     def updatePath(self):
         recentPaths = self.ic.getValue("recentPositionsList")
@@ -107,9 +122,12 @@ class UiGen:
             speeds.append([data.SOG, data.COG])
             alts.append(data.alt)
 
-        if("trace" in self.controls):
-           self.controls["theMap"].remove_layer(self.controls["trace"])
-           
+        #if("trace" in self.controls):
+        #    try:
+        #        self.controls["theMap"].remove_layer(self.controls["trace"])           
+        #    except Exception as e:
+        #        logger.warning(f"problem with removing the last trace {e}")
+
 
         self.controls["trace"] = self.controls["theMap"].generic_layer(name='polyline', args=[positions, {"color": "red"}]) 
         self.controls["elevationChart"].options['series'][0]['data'] = alts
@@ -127,21 +145,21 @@ class UiGen:
                 with ui.card().classes("h-full px-4 rounded bg-slate-500") as card:
                     self.controls["GPS card"] = card
                     with ui.column().style("gap: 0.1rem").classes("h-full items-center justify-center") as col:
-                        self.controls[f"GPS card StatusCol"] = col
-                        self.controls[f"GPS card StatusLab"] = ui.label(f"{'GPS card'} STATUS")
-                        self.controls[f"GPS card lat"] = ui.label("")
-                        self.controls[f"GPS card lon"] = ui.label("")
-                        self.controls[f"GPS card alt"] = ui.label("")
+                        self.controls["GPS card StatusCol"] = col
+                        self.controls["GPS card StatusLab"] = ui.label("GPS STATUS")
+                        self.controls["GPS card lat"] = ui.label("")
+                        self.controls["GPS card lon"] = ui.label("")
+                        self.controls["GPS card alt"] = ui.label("")
                 with ui.card().classes("h-full px-4 rounded bg-slate-500 flex items-center justify-center") as card:
                     self.controls["BATT card"] = card
                     with ui.column().style("gap: 0.1rem").classes("h-full items-center justify-center") as col:
-                        self.controls[f"BATT card StatusCol"] = col
-                        self.controls[f"BATT card StatusLab"] = ui.label("BATTERY STATUS")
-                        self.controls[f"BATT card percent"] = ui.label("")
-                        self.controls[f"BATT card status"] = ui.label("")
-                        self.controls[f"BATT card noneLabel"] = ui.label("")
+                        self.controls["BATT card StatusCol"] = col
+                        self.controls["BATT card StatusLab"] = ui.label("BATTERY STATUS")
+                        self.controls["BATT card percent"] = ui.label("")
+                        self.controls["BATT card status"] = ui.label("")
+                        self.controls["BATT card noneLabel"] = ui.label("")
 
-                        
+
 
 
         with ui.column().classes('w-full max-w-[1280px] mx-auto flex-1'):
@@ -165,8 +183,22 @@ class UiGen:
                         {"name": "elevation [m]", "color": "blue", "type": "line", "data": []}
                     ],
                 }).classes("w-full h-full")
-                
-        
+            
+            with ui.card().classes('w-full bg-gray-100 justify-between'):
+                with ui.row().classes("w-full gap-3"):
+                    with ui.button().props("flat").classes("flex-1 bg-red-600 text-white hover:bg-red-700") as cameraFeedButton:
+                        ui.icon("camera").classes("text-white")
+                        ui.link('  go to camera', '/video-live')
+                        
+
+
+                    with ui.button().props("flat").classes("flex-1 bg-green-600 text-white hover:bg-green-700") as plateListButton:
+                        ui.icon("fingerprint").classes("text-white")
+                        ui.link('  go to seen cars', '/car-list')
+                        
+                    
+
+                    
         ui.timer(interval=0.033, callback=self.updateAtVideoRate)
         ui.timer(interval=2, callback=self.fiveSecondRate)
 

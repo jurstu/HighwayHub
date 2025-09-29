@@ -3,6 +3,7 @@ import time
 from DataSource import InformationCenter, GpsHandler, BatteryMonitor
 from LoggingSetup import getLogger
 from UiGen import UiGen
+from Video import VideoManager
 
 
 logger = getLogger(__name__)
@@ -14,10 +15,14 @@ class HighwayHub:
         self.gpsHandler = GpsHandler()
         self.battMonitor = BatteryMonitor()
         
+        self.videoManager = VideoManager()
+
         self.uiGen = UiGen()
         self.uiGen.run()
+
         self.gpsHandler.nmeaParser.newPositionSignal.addReceiver(self.uiGen.updateGpsData)
         self.battMonitor.battDataUpdateSignal.addReceiver(self.uiGen.updateBatteryData)
+        self.videoManager.jdc.newJpegSignal.addReceiver(self.uiGen.videoPage.newJpegImage)
 
 
     def printMotd(self):

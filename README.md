@@ -6,12 +6,12 @@ Code for an embedded device in a car ;)
 ## Roadmap
 
 
-- [ ] data from UPS hat
-    - [ ] voltage, current, charging/not-charging
-    - [ ] time to depletion
+- [X] data from UPS hat
+    - [X] voltage, current, charging/not-charging
+    - [X] time to depletion
 
 - [ ] ui using nicegui
-    - [ ] car on a map
+    - [X] car on a map
     - [ ] angles of travel in NED frame 
     - [ ] last 800m highest and lowest space 
 

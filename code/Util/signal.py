@@ -1,6 +1,6 @@
 from LoggingSetup import getLogger
 
-logger = getLogger(__file__)
+logger = getLogger(__name__)
 
 class Signal:
     def __init__(self, name):
@@ -18,4 +18,4 @@ class Signal:
                 else:
                     rx()
             except Exception as ex:
-                logger.error(f"error at signal {self.name}", ex)
+                logger.error(f"error at signal {self.name} {ex}")
