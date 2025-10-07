@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>CANARD LZString decoder</title>
+</head>
+<body>
+  <h1>CANARD Payload Decoder</h1>
+
+  <textarea id="input" rows="10" cols="100"
+    placeholder="Paste the strange characters (the payload) here..."></textarea><br>
+
+  <button id="decode">Decode</button>
+  <pre id="output"></pre>
+
+  <!-- Include LZString -->
+  <script src="https://cdn.jsdelivr.net/npm/lz-string@1.5.0/libs/lz-string.min.js"></script>
+  <script>
+    document.getElementById('decode').onclick = () => {
+      const payload = document.getElementById('input').value.trim();
+      try {
+        const jsonText = LZString.decompressFromUTF16(payload);
+        const obj = JSON.parse(jsonText);
+        document.getElementById('output').textContent =
+          JSON.stringify(obj, null, 2);
+      } catch (err) {
+        document.getElementById('output').textContent =
+          "❌ Decode error:\n" + err + "\n\n" + payload.slice(0, 200);
+      }
+    };
+  </script>
+</body>
+</html>
+

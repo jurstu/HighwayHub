@@ -1,0 +1,677 @@
+[
+  {
+    "id": 91414742,
+    "lon": 18.289205555555558,
+    "lat": 52.149683333333336,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM23001804",
+    "lok2PktDlugosc": 18.447991667,
+    "lok2PktSzerokosc": 52.151241667
+  },
+  {
+    "id": 13862446,
+    "lon": 20.994555555555557,
+    "lat": 49.99254722222222,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM15001378",
+    "lok2PktDlugosc": 21.049105556,
+    "lok2PktSzerokosc": 50.008269444
+  },
+  {
+    "id": 90799008,
+    "lon": 18.136275,
+    "lat": 52.804788888888886,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM23001428",
+    "lok2PktDlugosc": 18.193775,
+    "lok2PktSzerokosc": 52.803297222
+  },
+  {
+    "id": 12825204,
+    "lon": 16.151477777777778,
+    "lat": 50.848847222222226,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM15001365",
+    "lok2PktDlugosc": 16.158961111,
+    "lok2PktSzerokosc": 50.870661111
+  },
+  {
+    "id": 8947143,
+    "lon": 17.553944444444443,
+    "lat": 50.79388888888889,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM15001388",
+    "lok2PktDlugosc": 17.581416667,
+    "lok2PktSzerokosc": 50.787666667
+  },
+  {
+    "id": 91414977,
+    "lon": 21.45617777777778,
+    "lat": 52.5558,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM23001807",
+    "lok2PktDlugosc": 21.49585,
+    "lok2PktSzerokosc": 52.604833333
+  },
+  {
+    "id": 13861852,
+    "lon": 19.230355555555555,
+    "lat": 51.34194166666667,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM15001383",
+    "lok2PktDlugosc": 19.249972222,
+    "lok2PktSzerokosc": 51.343158333
+  },
+  {
+    "id": 90797669,
+    "lon": 20.771077777777776,
+    "lat": 52.14033333333333,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM22010778",
+    "lok2PktDlugosc": 20.757744444,
+    "lok2PktSzerokosc": 52.131575
+  },
+  {
+    "id": 90799076,
+    "lon": 17.344513888888887,
+    "lat": 50.81216944444444,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM23000027",
+    "lok2PktDlugosc": 17.3459,
+    "lok2PktSzerokosc": 50.788475
+  },
+  {
+    "id": 90799066,
+    "lon": 18.980627777777777,
+    "lat": 50.270202777777776,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM23003841",
+    "lok2PktDlugosc": 18.963716667,
+    "lok2PktSzerokosc": 50.273980556
+  },
+  {
+    "id": 89607603,
+    "lon": 21.864625,
+    "lat": 51.52186944444444,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM23001426",
+    "lok2PktDlugosc": 21.877561111,
+    "lok2PktSzerokosc": 51.476877778
+  },
+  {
+    "id": 12825846,
+    "lon": 18.401777777777777,
+    "lat": 49.960055555555556,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM15001371",
+    "lok2PktDlugosc": 18.411555556,
+    "lok2PktSzerokosc": 49.96425
+  },
+  {
+    "id": 12807853,
+    "lon": 22.73616666666667,
+    "lat": 51.304111111111105,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM15001373",
+    "lok2PktDlugosc": 22.775861111,
+    "lok2PktSzerokosc": 51.297083333
+  },
+  {
+    "id": 90797708,
+    "lon": 18.79423888888889,
+    "lat": 50.029177777777775,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM22010779",
+    "lok2PktDlugosc": 18.851355556,
+    "lok2PktSzerokosc": 50.015727778
+  },
+  {
+    "id": 91415246,
+    "lon": 17.09736111111111,
+    "lat": 51.14277777777778,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM23003838",
+    "lok2PktDlugosc": 17.129444444,
+    "lok2PktSzerokosc": 51.153722222
+  },
+  {
+    "id": 25181164,
+    "lon": 18.3415,
+    "lat": 54.61966666666667,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM16003406",
+    "lok2PktDlugosc": 18.344666667,
+    "lok2PktSzerokosc": 54.63325
+  },
+  {
+    "id": 91414277,
+    "lon": 19.27111111111111,
+    "lat": 51.64797222222222,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM23001801",
+    "lok2PktDlugosc": 19.320972222,
+    "lok2PktSzerokosc": 51.680222222
+  },
+  {
+    "id": 90798227,
+    "lon": 18.293897222222224,
+    "lat": 54.275277777777774,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM22010787",
+    "lok2PktDlugosc": 18.308272222,
+    "lok2PktSzerokosc": 54.297969444
+  },
+  {
+    "id": 91414765,
+    "lon": 18.7668,
+    "lat": 52.86190277777778,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM23001806",
+    "lok2PktDlugosc": 18.8492,
+    "lok2PktSzerokosc": 52.768963889
+  },
+  {
+    "id": 86963874,
+    "lon": 20.955416666666665,
+    "lat": 51.66583333333333,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM23000026",
+    "lok2PktDlugosc": 21.033777778,
+    "lok2PktSzerokosc": 51.555472222
+  },
+  {
+    "id": 13861967,
+    "lon": 20.124055555555557,
+    "lat": 51.775277777777774,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM15001384",
+    "lok2PktDlugosc": 20.170638889,
+    "lok2PktSzerokosc": 51.772972222
+  },
+  {
+    "id": 90798983,
+    "lon": 18.921622222222222,
+    "lat": 53.50544444444444,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM23001805",
+    "lok2PktDlugosc": 18.9398,
+    "lok2PktSzerokosc": 53.517880556
+  },
+  {
+    "id": 89607544,
+    "lon": 23.84681111111111,
+    "lat": 50.858575,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM23001425",
+    "lok2PktDlugosc": 23.881572222,
+    "lok2PktSzerokosc": 50.829875
+  },
+  {
+    "id": 13862149,
+    "lon": 21.06537777777778,
+    "lat": 52.15171111111111,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM15001387",
+    "lok2PktDlugosc": 21.033269444,
+    "lok2PktSzerokosc": 52.140291667
+  },
+  {
+    "id": 90798996,
+    "lon": 18.284536111111112,
+    "lat": 54.31651944444444,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM23001427",
+    "lok2PktDlugosc": 18.302894444,
+    "lok2PktSzerokosc": 54.321555556
+  },
+  {
+    "id": 13862413,
+    "lon": 21.856972222222225,
+    "lat": 49.684038888888885,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM15001386",
+    "lok2PktDlugosc": 21.8492,
+    "lok2PktSzerokosc": 49.673988889
+  },
+  {
+    "id": 13500954,
+    "lon": 15.657833333333334,
+    "lat": 52.091,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM15001363",
+    "lok2PktDlugosc": 15.7009,
+    "lok2PktSzerokosc": 52.096783333
+  },
+  {
+    "id": 12825787,
+    "lon": 16.158336111111108,
+    "lat": 50.87048333333333,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM15001380",
+    "lok2PktDlugosc": 16.151830556,
+    "lok2PktSzerokosc": 50.84975
+  },
+  {
+    "id": 90798375,
+    "lon": 18.668886111111114,
+    "lat": 50.31542222222222,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM23001424",
+    "lok2PktDlugosc": 18.709455556,
+    "lok2PktSzerokosc": 50.312605556
+  },
+  {
+    "id": 91414183,
+    "lon": 20.102222222222224,
+    "lat": 51.995555555555555,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM22010782",
+    "lok2PktDlugosc": 20.126388889,
+    "lok2PktSzerokosc": 51.979166667
+  },
+  {
+    "id": 13861996,
+    "lon": 20.735222222222223,
+    "lat": 50.86569444444444,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM15001375",
+    "lok2PktDlugosc": 20.790611111,
+    "lok2PktSzerokosc": 50.861111111
+  },
+  {
+    "id": 86963975,
+    "lon": 14.242277777777778,
+    "lat": 53.89094444444444,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM23003840",
+    "lok2PktDlugosc": 14.269166667,
+    "lok2PktSzerokosc": 53.901722222
+  },
+  {
+    "id": 90798297,
+    "lon": 17.812727777777777,
+    "lat": 50.30016666666666,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM23001422",
+    "lok2PktDlugosc": 17.810936111,
+    "lok2PktSzerokosc": 50.279158333
+  },
+  {
+    "id": 11337015,
+    "lon": 20.958949999999998,
+    "lat": 52.8337,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM15001377",
+    "lok2PktDlugosc": 20.984283333,
+    "lok2PktSzerokosc": 52.839
+  },
+  {
+    "id": 89607636,
+    "lon": 21.342447222222223,
+    "lat": 50.00929722222222,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM23001430",
+    "lok2PktDlugosc": 21.354530556,
+    "lok2PktSzerokosc": 50.014897222
+  },
+  {
+    "id": 13500662,
+    "lon": 20.252861111111113,
+    "lat": 52.20805555555556,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM15001367",
+    "lok2PktDlugosc": 20.277333333,
+    "lok2PktSzerokosc": 52.186611111
+  },
+  {
+    "id": 91418175,
+    "lon": 16.86138888888889,
+    "lat": 52.35219444444444,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM23003973",
+    "lok2PktDlugosc": 16.969888889,
+    "lok2PktSzerokosc": 52.348388889
+  },
+  {
+    "id": 91414451,
+    "lon": 20.994722222222222,
+    "lat": 51.89694444444444,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM23000032",
+    "lok2PktDlugosc": 21.095555556,
+    "lok2PktSzerokosc": 51.915555556
+  },
+  {
+    "id": 12931401,
+    "lon": 18.84947222222222,
+    "lat": 50.4345,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM15001379",
+    "lok2PktDlugosc": 18.862916667,
+    "lok2PktSzerokosc": 50.431972222
+  },
+  {
+    "id": 11423333,
+    "lon": 21.638277777777777,
+    "lat": 52.43883333333333,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM15001374",
+    "lok2PktDlugosc": 21.653194444,
+    "lok2PktSzerokosc": 52.460361111
+  },
+  {
+    "id": 91414174,
+    "lon": 19.36031388888889,
+    "lat": 51.641530555555555,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM22010781",
+    "lok2PktDlugosc": 19.361105556,
+    "lok2PktSzerokosc": 51.622388889
+  },
+  {
+    "id": 89607520,
+    "lon": 22.51911111111111,
+    "lat": 50.11783333333334,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM22010786",
+    "lok2PktDlugosc": 22.493666667,
+    "lok2PktSzerokosc": 50.099111111
+  },
+  {
+    "id": 13862031,
+    "lon": 22.901027777777777,
+    "lat": 51.29888888888889,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM15001368",
+    "lok2PktDlugosc": 22.95525,
+    "lok2PktSzerokosc": 51.303944444
+  },
+  {
+    "id": 71652912,
+    "lon": 21.10263888888889,
+    "lat": 52.30758333333333,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM21003327",
+    "lok2PktDlugosc": 21.044527778,
+    "lok2PktSzerokosc": 52.302888889
+  },
+  {
+    "id": 13501525,
+    "lon": 19.904555555555554,
+    "lat": 49.650999999999996,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM15001390",
+    "lok2PktDlugosc": 19.889944444,
+    "lok2PktSzerokosc": 49.667222222
+  },
+  {
+    "id": 10764316,
+    "lon": 23.289683333333336,
+    "lat": 53.04821666666666,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM15001389",
+    "lok2PktDlugosc": 23.321283333,
+    "lok2PktSzerokosc": 53.021066667
+  },
+  {
+    "id": 13501468,
+    "lon": 16.23951388888889,
+    "lat": 51.70731666666667,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM15001381",
+    "lok2PktDlugosc": 16.259069444,
+    "lok2PktSzerokosc": 51.725569444
+  },
+  {
+    "id": 71652931,
+    "lon": 20.89136111111111,
+    "lat": 52.242444444444445,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM21003329",
+    "lok2PktDlugosc": 20.868083333,
+    "lok2PktSzerokosc": 52.220111111
+  },
+  {
+    "id": 86963966,
+    "lon": 14.912308333333334,
+    "lat": 52.67460833333333,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM23001429",
+    "lok2PktDlugosc": 14.957783333,
+    "lok2PktSzerokosc": 52.676625
+  },
+  {
+    "id": 13861774,
+    "lon": 20.021583333333332,
+    "lat": 51.55611111111111,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM15001362",
+    "lok2PktDlugosc": 20.0495,
+    "lok2PktSzerokosc": 51.550305556
+  },
+  {
+    "id": 91414698,
+    "lon": 16.72637222222222,
+    "lat": 52.41266111111111,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM23001803",
+    "lok2PktDlugosc": 16.735511111,
+    "lok2PktSzerokosc": 52.432494444
+  },
+  {
+    "id": 12825860,
+    "lon": 18.581583333333334,
+    "lat": 50.199416666666664,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM15001364",
+    "lok2PktDlugosc": 18.600222222,
+    "lok2PktSzerokosc": 50.215222222
+  },
+  {
+    "id": 91414226,
+    "lon": 19.236580555555555,
+    "lat": 52.440861111111104,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM23001421",
+    "lok2PktDlugosc": 19.356483333,
+    "lok2PktSzerokosc": 52.339944444
+  },
+  {
+    "id": 90798213,
+    "lon": 22.972527777777778,
+    "lat": 53.04805555555556,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM23000031",
+    "lok2PktDlugosc": 22.848888889,
+    "lok2PktSzerokosc": 53.041444444
+  },
+  {
+    "id": 91417929,
+    "lon": 16.86138888888889,
+    "lat": 52.35219444444444,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM23003974",
+    "lok2PktDlugosc": 16.969888889,
+    "lok2PktSzerokosc": 52.348388889
+  },
+  {
+    "id": 86963955,
+    "lon": 16.621555555555556,
+    "lat": 51.035444444444444,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM23000034",
+    "lok2PktDlugosc": 16.732558333,
+    "lok2PktSzerokosc": 51.019625
+  },
+  {
+    "id": 12931379,
+    "lon": 21.261944444444445,
+    "lat": 52.22230555555556,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM15001369",
+    "lok2PktDlugosc": 21.281666667,
+    "lok2PktSzerokosc": 52.221583333
+  },
+  {
+    "id": 89605782,
+    "lon": 20.530369444444442,
+    "lat": 51.98106666666667,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM23000025",
+    "lok2PktDlugosc": 20.571869444,
+    "lok2PktSzerokosc": 51.972547222
+  },
+  {
+    "id": 90798353,
+    "lon": 18.57438888888889,
+    "lat": 50.04185833333333,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM23001423",
+    "lok2PktDlugosc": 18.587880556,
+    "lok2PktSzerokosc": 50.029291667
+  },
+  {
+    "id": 12825830,
+    "lon": 21.944388888888888,
+    "lat": 50.57211111111111,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM15001370",
+    "lok2PktDlugosc": 22.034111111,
+    "lok2PktSzerokosc": 50.569525
+  },
+  {
+    "id": 13862113,
+    "lon": 21.305127777777777,
+    "lat": 53.825875,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM15001376",
+    "lok2PktDlugosc": 21.334166667,
+    "lok2PktSzerokosc": 53.779719444
+  },
+  {
+    "id": 89607811,
+    "lon": 21.88872222222222,
+    "lat": 49.80661111111111,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM23000028",
+    "lok2PktDlugosc": 21.911566667,
+    "lok2PktSzerokosc": 49.803222222
+  },
+  {
+    "id": 13862235,
+    "lon": 21.78805555555556,
+    "lat": 50.231500000000004,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM15001385",
+    "lok2PktDlugosc": 21.8145,
+    "lok2PktSzerokosc": 50.214722222
+  },
+  {
+    "id": 86963938,
+    "lon": 15.191472222222222,
+    "lat": 52.887569444444445,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM23000029",
+    "lok2PktDlugosc": 15.182491667,
+    "lok2PktSzerokosc": 52.956825
+  },
+  {
+    "id": 89605902,
+    "lon": 21.75051388888889,
+    "lat": 50.43845555555555,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM22010785",
+    "lok2PktDlugosc": 21.752775,
+    "lok2PktSzerokosc": 50.422380556
+  },
+  {
+    "id": 110646878,
+    "lon": 16.776944444444442,
+    "lat": 51.02311111111111,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM25001968",
+    "lok2PktDlugosc": 16.880111111,
+    "lok2PktSzerokosc": 51.036805556
+  },
+  {
+    "id": 89605797,
+    "lon": 21.903499999999998,
+    "lat": 50.03886111111111,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM22010783",
+    "lok2PktDlugosc": 21.951472222,
+    "lok2PktSzerokosc": 50.054833333
+  },
+  {
+    "id": 13501544,
+    "lon": 20.229,
+    "lat": 53.74426666666667,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM15001372",
+    "lok2PktDlugosc": 20.297394444,
+    "lok2PktSzerokosc": 53.759905556
+  },
+  {
+    "id": 90799056,
+    "lon": 18.737125000000002,
+    "lat": 50.31138333333333,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM23003839",
+    "lok2PktDlugosc": 18.829808333,
+    "lok2PktSzerokosc": 50.335288889
+  },
+  {
+    "id": 90798253,
+    "lon": 18.428633333333334,
+    "lat": 51.27568333333333,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM23000033",
+    "lok2PktDlugosc": 18.476894444,
+    "lok2PktSzerokosc": 51.261155556
+  },
+  {
+    "id": 90797792,
+    "lon": 18.808308333333333,
+    "lat": 50.22686388888889,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM23000030",
+    "lok2PktDlugosc": 18.824508333,
+    "lok2PktSzerokosc": 50.221522222
+  },
+  {
+    "id": 90798287,
+    "lon": 18.96358611111111,
+    "lat": 50.273783333333334,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM23001802",
+    "lok2PktDlugosc": 18.980477778,
+    "lok2PktSzerokosc": 50.270119444
+  },
+  {
+    "id": 89605843,
+    "lon": 21.687944444444444,
+    "lat": 49.561,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM22010784",
+    "lok2PktDlugosc": 21.684177778,
+    "lok2PktSzerokosc": 49.548805556
+  },
+  {
+    "id": 12825720,
+    "lon": 21.03162222222222,
+    "lat": 52.13998888888889,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM15001366",
+    "lok2PktDlugosc": 21.063252778,
+    "lok2PktSzerokosc": 52.150588889
+  },
+  {
+    "id": 71652896,
+    "lon": 21.044861111111114,
+    "lat": 52.302527777777776,
+    "rodzajPomiaru": "PO",
+    "nrSeryjny": "CAM21003326",
+    "lok2PktDlugosc": 21.102694444,
+    "lok2PktSzerokosc": 52.30725
+  }
+]
