@@ -1,36 +1,39 @@
+import re
 import json
-from pathlib import Path
+import requests
+from lzstring import LZString
 
-# Paths
-datasets = [f"dataset_{i}.json" for i in range(4)]
-detailed_path = Path("canard_detailed_data.json")
+lz = LZString()
+URL = "https://www.canard.gitd.gov.pl/cms/o-nas/mapa-urzadzen"
 
-# Load all expected IDs from dataset files
-all_ids = set()
-for ds_path in datasets:
-    with open(ds_path, "r", encoding="utf-8") as f:
-        data = json.load(f)
-        for entry in data:
-            all_ids.add(str(entry["id"]))
+session = requests.Session()
+resp = session.get(URL)
+resp.raise_for_status()
+html = resp.text
 
-print(f"📦 Total IDs found in datasets: {len(all_ids)}")
+# Step 1: Find all Base64 strings in the HTML that look like LZString payloads
+# They are usually very long and wrapped in quotes
+candidates = re.findall(r'"([A-Za-z0-9+/=]{200,})"', html)
 
-# Load existing data file
-if detailed_path.exists():
-    with open(detailed_path, "r", encoding="utf-8") as f:
-        detailed_data = json.load(f)
-    existing_ids = set(detailed_data.keys())
-else:
-    print("⚠ No canard_detailed_data.json found — treating as empty.")
-    existing_ids = set()
+if not candidates:
+    raise RuntimeError("No Base64 payloads found in page")
 
-# Determine which IDs are missing
-missing_ids = sorted(all_ids - existing_ids, key=int)
+print(f"Found {len(candidates)} compressed datasets")
 
-print(f"🧩 Missing entries: {len(missing_ids)}")
-if missing_ids:
-    print("\n".join(missing_ids))
+datasets = {}
+for idx, compressed in enumerate(candidates):
+    try:
+        decoded = lz.decompressFromBase64(compressed)
+        if decoded and decoded.strip().startswith("["):
+            data = json.loads(decoded)
+            datasets[f"dataset_{idx}"] = data
+            print(f"Decoded dataset_{idx}: {len(data)} features")
+    except Exception as e:
+        print(f"Candidate {idx} failed: {e}")
 
-# Optionally, write them to a file for later use
-Path("missing_ids.txt").write_text("\n".join(missing_ids), encoding="utf-8")
-print("\n📝 Saved list to missing_ids.txt")
+# Save each dataset to file
+for name, data in datasets.items():
+    with open(f"{name}.json", "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+
+print("✅ Done. Decoded datasets saved as dataset_X.json")
