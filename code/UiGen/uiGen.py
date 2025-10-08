@@ -28,6 +28,8 @@ class UiGen:
         self.controls = {}
         self.carListPage = CarListPage()
         self.videoPage = VideoLivePage()
+        self.radarsLoaded = 0
+
 
         self.loadSettingsFromParams(self.ic.getValue("PARAMS"))
 
@@ -82,6 +84,18 @@ class UiGen:
     def fiveSecondRate(self):
         if(self.rendered == 0):
             return
+        
+        self.loadRadars()
+        for k, v in self.controls.items():
+            if k.startswith("radar_"):
+                logger.info(f"changing {k}")
+
+                #v.run_method("setIcon", 'L.icon({iconUrl: "/car.png", iconSize: [32, 32], iconAnchor: [16, 16]})')
+
+                v.run_method('setOpacity', 0.8)
+                v.update()
+        self.controls["theMap"].update()
+
         lastGpsUpdate = self.ic.getValue("last gps update ts", 0)
         if(time.time() - lastGpsUpdate > 2):
             a = EmptyClass()
@@ -167,6 +181,9 @@ class UiGen:
 
 
     def loadRadars(self):
+        if(self.radarsLoaded):
+            return
+        
         try:
             with open("assets/canard_detailed_data.json", "r") as f:
                 data = json.load(f)
@@ -188,7 +205,10 @@ class UiGen:
 
                 marker = self.controls["theMap"].marker(latlng=(lat, lon))
                 marker.run_method(':setIcon', icon)
+                #marker.move(51.51, -0.09)
                 
+                
+
                 self.controls[controlsKey] = marker
                 
 
@@ -196,14 +216,8 @@ class UiGen:
             #else:
             #    logger.debug(recData.keys())
 
-        return
-        for k,v in self.controls.items():
-            if k.startswith("radar_"):
-                logger.info(f"changing {k}")
-                icon = 'L.icon({iconUrl: "https://leafletjs.com/examples/custom-icons/leaf-green.png"})'
-                
-                self.controls[k].run_method(':setIcon', icon)
-                #self.controls[k].run_method(':setIcon', 'L.icon({iconUrl: "/radar.png", iconSize: [16, 16], iconAnchor: [8, 8]})')
+
+        self.radarsLoaded = 1
 
 
 
@@ -219,6 +233,8 @@ class UiGen:
                                                 zoom=6,
                                                 additional_resources=['/rotatedMarker.js']
                                                 ).classes('w-full h-[calc(33vh)]')
+            
+            
 
             with ui.card().classes('w-full bg-gray-100 h-[calc(33vh)]'):
                 self.controls["elevationChart"] = ui.echart({
@@ -256,7 +272,7 @@ class UiGen:
         ui.timer(interval=2, callback=self.fiveSecondRate)
 
 
-        self.loadRadars()
+        
 
         @app.get("/video/frame", response_class=Response)
         def grabVideoFrame() -> Response:
