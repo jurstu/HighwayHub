@@ -21,16 +21,20 @@ logger = getLogger(__name__)
 class UiGen:
     def __init__(self):
         self.ngStarted = 0
+        self.rendered = 0
         self.state = EmptyClass()
         self.ic = InformationCenter()
 
 
 
         self.controls = {}
-        ui.page('/')(self.spawnGui)()
         self.carListPage = CarListPage()
         self.videoPage = VideoLivePage()
 
+
+
+        
+        
         self.loadSettingsFromParams(self.ic.getValue("PARAMS"))
 
     def run(self):
@@ -43,7 +47,33 @@ class UiGen:
 
     def host(self):
         with redirect_stdout(StdoutInterceptor("." + __name__ + ".NiceGUI", self.ngStartedCb)):
-            ui.run(reload=False, show=False)
+            ui.run(self.idk, reload=False, show=False)
+
+    def idk(self):
+        with ui.footer().classes("bg-gray-800 text-white p-2 items-stretch"):  # force vertical stretch
+            with ui.row().classes("w-full items-stretch"):
+                with ui.card().classes("h-full px-4 rounded bg-slate-500") as card:
+                    self.controls["GPS card"] = card
+                    with ui.column().style("gap: 0.1rem").classes("h-full items-center justify-center") as col:
+                        self.controls["GPS card StatusCol"] = col
+                        self.controls["GPS card StatusLab"] = ui.label("GPS STATUS")
+                        self.controls["GPS card lat"] = ui.label("")
+                        self.controls["GPS card lon"] = ui.label("")
+                        self.controls["GPS card alt"] = ui.label("")
+                with ui.card().classes("h-full px-4 rounded bg-slate-500 flex items-center justify-center") as card:
+                    self.controls["BATT card"] = card
+                    with ui.column().style("gap: 0.1rem").classes("h-full items-center justify-center") as col:
+                        self.controls["BATT card StatusCol"] = col
+                        self.controls["BATT card StatusLab"] = ui.label("BATTERY STATUS")
+                        self.controls["BATT card percent"] = ui.label("")
+                        self.controls["BATT card status"] = ui.label("")
+                        self.controls["BATT card noneLabel"] = ui.label("")
+
+        ui.sub_pages({
+            "/": self.spawnGui, 
+            "/video-live": self.videoPage.spawnGui,
+            "/car-list": self.carListPage.spawnGui
+        })
 
     def loadSettingsFromParams(self, params):
         self.state.hh = params["firstVideoSettings"]["hh"]
@@ -56,6 +86,8 @@ class UiGen:
         pass
 
     def fiveSecondRate(self):
+        if(self.rendered == 0):
+            return
         lastGpsUpdate = self.ic.getValue("last gps update ts", 0)
         if(time.time() - lastGpsUpdate > 2):
             a = EmptyClass()
@@ -64,6 +96,8 @@ class UiGen:
 
 
     def updateBatteryData(self, data):
+        if(self.rendered == 0):
+            return
         self.controls["BATT card"].classes(remove="bg-green-500 bg-yellow-500 bg-red-500 bg-slate-500")
         self.controls[f"BATT card percent"].text = "{: 2d}%".format(data.battPercent)
         self.controls[f"BATT card status"].text = "{}".format(data.chargingStatus)
@@ -79,6 +113,8 @@ class UiGen:
         self.videoPage.updateBatteryData(data)
 
     def updateGpsData(self, data):
+        if(self.rendered == 0):
+            return
         self.controls["GPS card"].classes(remove="bg-green-500 bg-yellow-500 bg-red-500 bg-slate-500")
 
         status = data.fix
@@ -112,6 +148,8 @@ class UiGen:
         self.videoPage.updateGpsData(data)
 
     def updatePath(self):
+        if(self.rendered == 0):
+            return
         recentPaths = self.ic.getValue("recentPositionsList")
         positions = []
         speeds = []
@@ -140,26 +178,6 @@ class UiGen:
         dark.enable()
 
         # with ui.header().classes("bg-gray-800 text-white justify-between p-2"):
-        with ui.footer().classes("bg-gray-800 text-white p-2 items-stretch"):  # force vertical stretch
-            with ui.row().classes("w-full items-stretch"):
-                with ui.card().classes("h-full px-4 rounded bg-slate-500") as card:
-                    self.controls["GPS card"] = card
-                    with ui.column().style("gap: 0.1rem").classes("h-full items-center justify-center") as col:
-                        self.controls["GPS card StatusCol"] = col
-                        self.controls["GPS card StatusLab"] = ui.label("GPS STATUS")
-                        self.controls["GPS card lat"] = ui.label("")
-                        self.controls["GPS card lon"] = ui.label("")
-                        self.controls["GPS card alt"] = ui.label("")
-                with ui.card().classes("h-full px-4 rounded bg-slate-500 flex items-center justify-center") as card:
-                    self.controls["BATT card"] = card
-                    with ui.column().style("gap: 0.1rem").classes("h-full items-center justify-center") as col:
-                        self.controls["BATT card StatusCol"] = col
-                        self.controls["BATT card StatusLab"] = ui.label("BATTERY STATUS")
-                        self.controls["BATT card percent"] = ui.label("")
-                        self.controls["BATT card status"] = ui.label("")
-                        self.controls["BATT card noneLabel"] = ui.label("")
-
-
 
 
         with ui.column().classes('w-full max-w-[1280px] mx-auto flex-1'):
@@ -213,6 +231,8 @@ class UiGen:
         @app.get("/rotatedMarker.js")
         def serve_dynamic_image():
             return FileResponse("./UiGen/leaflet.rotatedMarker.js", media_type='text/javascript')
+
+        self.rendered = True
 
 if __name__ == "__main__":
     from .uiGen import UiGen
