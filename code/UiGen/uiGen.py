@@ -25,16 +25,10 @@ class UiGen:
         self.state = EmptyClass()
         self.ic = InformationCenter()
 
-
-
         self.controls = {}
         self.carListPage = CarListPage()
         self.videoPage = VideoLivePage()
 
-
-
-        
-        
         self.loadSettingsFromParams(self.ic.getValue("PARAMS"))
 
     def run(self):
@@ -167,9 +161,49 @@ class UiGen:
         #        logger.warning(f"problem with removing the last trace {e}")
 
 
-        self.controls["trace"] = self.controls["theMap"].generic_layer(name='polyline', args=[positions, {"color": "red"}]) 
+        #self.controls["trace"] = self.controls["theMap"].generic_layer(name='polyline', args=[positions, {"color": "red"}]) 
         self.controls["elevationChart"].options['series'][0]['data'] = alts
         self.controls["elevationChart"].update()
+
+
+    def loadRadars(self):
+        try:
+            with open("assets/canard_detailed_data.json", "r") as f:
+                data = json.load(f)
+            
+        except Exception as e:
+            logger.warning(f"couldn't load canard data {e}")
+            data = {}
+
+        for k, recData in data.items():            
+            # we actually don't need the key, but wth
+            lat = recData["lat"]
+            lon = recData["lon"]
+            if("urzadzenie" in recData):
+                devType = recData["urzadzenie"]["rodzajPomiaru"]
+                if(devType != "PO"):
+                    continue
+                controlsKey = f"radar_{k}"
+                icon = 'L.icon({iconUrl: "https://leafletjs.com/examples/custom-icons/leaf-green.png"})'
+
+                marker = self.controls["theMap"].marker(latlng=(lat, lon))
+                marker.run_method(':setIcon', icon)
+                
+                self.controls[controlsKey] = marker
+                
+
+            # "punkty kontrolne " don't have no "urzadzenie" key.
+            #else:
+            #    logger.debug(recData.keys())
+
+        return
+        for k,v in self.controls.items():
+            if k.startswith("radar_"):
+                logger.info(f"changing {k}")
+                icon = 'L.icon({iconUrl: "https://leafletjs.com/examples/custom-icons/leaf-green.png"})'
+                
+                self.controls[k].run_method(':setIcon', icon)
+                #self.controls[k].run_method(':setIcon', 'L.icon({iconUrl: "/radar.png", iconSize: [16, 16], iconAnchor: [8, 8]})')
 
 
 
@@ -181,9 +215,10 @@ class UiGen:
 
 
         with ui.column().classes('w-full max-w-[1280px] mx-auto flex-1'):
-            self.controls["theMap"] = ui.leaflet(additional_resources=[
-                '/rotatedMarker.js'
-            ]).classes('w-full h-[calc(33vh)]')
+            self.controls["theMap"] = ui.leaflet(center=(52.198769, 19.228751),
+                                                zoom=6,
+                                                additional_resources=['/rotatedMarker.js']
+                                                ).classes('w-full h-[calc(33vh)]')
 
             with ui.card().classes('w-full bg-gray-100 h-[calc(33vh)]'):
                 self.controls["elevationChart"] = ui.echart({
@@ -220,6 +255,9 @@ class UiGen:
         ui.timer(interval=0.033, callback=self.updateAtVideoRate)
         ui.timer(interval=2, callback=self.fiveSecondRate)
 
+
+        self.loadRadars()
+
         @app.get("/video/frame", response_class=Response)
         def grabVideoFrame() -> Response:
             return Response(content=self.state.latestFrameJpeg, media_type="image/jpg")
@@ -227,6 +265,11 @@ class UiGen:
         @app.get("/car.png")
         def serve_dynamic_image():
             return FileResponse("./assets/car.png", media_type='image/png')
+
+        @app.get("/radar.png")
+        def serve_dynamic_image():
+            return FileResponse("./assets/radar.png", media_type='image/png')
+
 
         @app.get("/rotatedMarker.js")
         def serve_dynamic_image():
