@@ -88,12 +88,9 @@ class UiGen:
         self.loadRadars()
         for k, v in self.controls.items():
             if k.startswith("radar_"):
-                logger.info(f"changing {k}")
-
-                #v.run_method("setIcon", 'L.icon({iconUrl: "/car.png", iconSize: [32, 32], iconAnchor: [16, 16]})')
-
-                v.run_method('setOpacity', 0.8)
-                v.update()
+                #logger.info(f"changing {k}")
+                pass
+                
         self.controls["theMap"].update()
 
         lastGpsUpdate = self.ic.getValue("last gps update ts", 0)
@@ -192,24 +189,43 @@ class UiGen:
             logger.warning(f"couldn't load canard data {e}")
             data = {}
 
+
+        detectionRadius = self.ic.getValue("RadarWatcherObject").detectionEntryRadius
+        m = self.controls["theMap"]
         for k, recData in data.items():            
             # we actually don't need the key, but wth
             lat = recData["lat"]
             lon = recData["lon"]
             if("urzadzenie" in recData):
                 devType = recData["urzadzenie"]["rodzajPomiaru"]
-                if(devType != "PO"):
-                    continue
                 controlsKey = f"radar_{k}"
+
+                color = "#FFFFFF"
+                if(devType == "PO"):
+                    color = "#0000C0"
+                    endpointLoc = recData["urzadzenie"]["lokalizacjaDrugiegoPunktu"].split(";")
+                    lon2, lat2 = [float(x) for x in endpointLoc]
+                    #logger.debug(f"{lat2} {lon2}")
+                    self.controls[f"{controlsKey}_endpoint"] = m.generic_layer(name='circle', args=[[lat2, lon2], {"radius": detectionRadius+10, "color": color, "fill": False}])
+                    self.controls[f"{controlsKey}_line"] = self.controls["theMap"].generic_layer(name='polyline', args=[[[lat, lon],[lat2, lon2]], {"color": "purple"}]) 
+                elif(devType == "PC"):
+                    color = "#c00000"
+                elif(devType == "PP"):
+                    color = "#c0c000"
+
+                self.controls[controlsKey] = m.generic_layer(name='circle', args=[[lat, lon], {"radius": detectionRadius, "color": color, "fill": False}])
+
+                
+
                 icon = 'L.icon({iconUrl: "https://leafletjs.com/examples/custom-icons/leaf-green.png"})'
 
-                marker = self.controls["theMap"].marker(latlng=(lat, lon))
-                marker.run_method(':setIcon', icon)
+                #marker = self.controls["theMap"].marker(latlng=(lat, lon))
+                #marker.run_method(':setIcon', icon)
                 #marker.move(51.51, -0.09)
                 
                 
 
-                self.controls[controlsKey] = marker
+                #self.controls[controlsKey] = marker
                 
 
             # "punkty kontrolne " don't have no "urzadzenie" key.
@@ -228,12 +244,14 @@ class UiGen:
         # with ui.header().classes("bg-gray-800 text-white justify-between p-2"):
 
 
-        with ui.column().classes('w-full max-w-[1280px] mx-auto flex-1'):
+        with ui.column().classes('w-full max-w-1280px mx-auto flex-1'):
             self.controls["theMap"] = ui.leaflet(center=(52.198769, 19.228751),
                                                 zoom=6,
                                                 additional_resources=['/rotatedMarker.js']
                                                 ).classes('w-full h-[calc(33vh)]')
-            
+            #while(1):
+            #    if(self.controls["theMap"].initialized()):
+            #        break
             
 
             with ui.card().classes('w-full bg-gray-100 h-[calc(33vh)]'):

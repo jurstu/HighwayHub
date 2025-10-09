@@ -1,6 +1,6 @@
 import time
 
-from DataSource import InformationCenter, GpsHandler, BatteryMonitor
+from DataSource import InformationCenter, GpsHandler, BatteryMonitor, RadarWatcher
 from LoggingSetup import getLogger
 from UiGen import UiGen
 from Video import VideoManager
@@ -13,6 +13,8 @@ class HighwayHub:
         self.printMotd()
         self.ic = InformationCenter()
         self.gpsHandler = GpsHandler()
+        self.radarWatcher = RadarWatcher()
+
 
         if(isThisX86()):
             pass
