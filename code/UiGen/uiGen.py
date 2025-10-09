@@ -236,6 +236,11 @@ class UiGen:
         self.radarsLoaded = 1
 
 
+    def handleMouseMove(self, e: events.GenericEventArguments):
+        lat = e.args['latlng']['lat']
+        lon = e.args['latlng']['lng']
+        watcherObject = self.ic.getValue("RadarWatcherObject")
+        watcherObject.getDistances([lat, lon])
 
     def spawnGui(self):
         dark = ui.dark_mode()
@@ -249,6 +254,8 @@ class UiGen:
                                                 zoom=6,
                                                 additional_resources=['/rotatedMarker.js']
                                                 ).classes('w-full h-[calc(33vh)]')
+            self.controls["theMap"].on('map-mousemove', self.handleMouseMove)
+
             #while(1):
             #    if(self.controls["theMap"].initialized()):
             #        break
