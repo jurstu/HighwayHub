@@ -132,7 +132,9 @@ for obj in detected_objects:
             # If you have class names, you can add them to the image
             if box.cls is not None:
                 label = f"{result.names[int(box.cls[0])]} {box.conf[0]:.2f}"
-                cv2.putText(image, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 0, 0), 2)
+                label = label.split(" ")[0]
+                print(label)
+                image = cv2.putText(image, "asdf", ((x1+x2)//2, (y1+y2)//2 +10 ), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 1)
 
 
 
