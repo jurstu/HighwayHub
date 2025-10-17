@@ -37,3 +37,6 @@ for name, data in datasets.items():
         json.dump(data, f, indent=2, ensure_ascii=False)
 
 print("✅ Done. Decoded datasets saved as dataset_X.json")
+
+
+# https://www.bezpecnecesty.cz/cz/dopravni-informace-mapy/aktualni-dopravni-info?utm_source=chatgpt.com
