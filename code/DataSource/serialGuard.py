@@ -27,7 +27,7 @@ class SerialGuard:
             try:
                 self.serial = serial.Serial(self.portName, self.portBaud)
             except Exception as e:
-                logger.error("couldn't open serial: " + str(e))
+                #logger.error("couldn't open serial: " + str(e))
                 time.sleep(1)
                 continue
 

@@ -12,3 +12,4 @@ requests
 smbus
 pycairo 
 PyGObject==3.50.0
+lzstring

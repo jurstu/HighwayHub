@@ -1,10 +1,10 @@
 import time
 
-from DataSource import InformationCenter, GpsHandler, BatteryMonitor
+from DataSource import InformationCenter, GpsHandler, BatteryMonitor, RadarWatcher
 from LoggingSetup import getLogger
 from UiGen import UiGen
 from Video import VideoManager
-
+from Util import isThisX86
 
 logger = getLogger(__name__)
 
@@ -13,7 +13,13 @@ class HighwayHub:
         self.printMotd()
         self.ic = InformationCenter()
         self.gpsHandler = GpsHandler()
-        self.battMonitor = BatteryMonitor()
+        self.radarWatcher = RadarWatcher()
+
+
+        if(isThisX86()):
+            pass
+        else:
+            self.battMonitor = BatteryMonitor()
         
         self.videoManager = VideoManager()
 
@@ -21,7 +27,10 @@ class HighwayHub:
         self.uiGen.run()
 
         self.gpsHandler.nmeaParser.newPositionSignal.addReceiver(self.uiGen.updateGpsData)
-        self.battMonitor.battDataUpdateSignal.addReceiver(self.uiGen.updateBatteryData)
+        if(isThisX86()):
+            pass
+        else:
+            self.battMonitor.battDataUpdateSignal.addReceiver(self.uiGen.updateBatteryData)
         self.videoManager.jdc.newJpegSignal.addReceiver(self.uiGen.videoPage.newJpegImage)
 
 
@@ -34,5 +43,8 @@ class HighwayHub:
 
     def run(self):
         while(1):
-            self.battMonitor.updateData()
+            if(isThisX86()):
+                pass
+            else:
+                self.battMonitor.updateData()
             time.sleep(1)

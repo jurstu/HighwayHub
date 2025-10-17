@@ -1,0 +1,1037 @@
+[
+  {
+    "id": 6506534,
+    "lon": 18.832969444444444,
+    "lat": 50.1372,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-ctrl-d000021",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 8552896,
+    "lon": 20.861222222222224,
+    "lat": 52.03861111111111,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-ctrl-d000035",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 27731738,
+    "lon": 20.935352777777776,
+    "lat": 52.363308333333336,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpuf4-000005",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 91058168,
+    "lon": 18.78852777777778,
+    "lat": 50.30981944444444,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06b00149",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 90831463,
+    "lon": 19.656477777777777,
+    "lat": 51.40623611111111,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06b00124",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 83347988,
+    "lon": 15.575844444444444,
+    "lat": 51.26153611111111,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06b00109",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 91179279,
+    "lon": 17.71944444444444,
+    "lat": 52.85069444444444,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06b00168",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 90802282,
+    "lon": 17.041416666666667,
+    "lat": 54.46497222222222,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06b00117",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 91057722,
+    "lon": 20.64131111111111,
+    "lat": 50.871541666666666,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06b00146",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 90507038,
+    "lon": 17.591388888888886,
+    "lat": 53.151111111111106,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06b00115",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 6289960,
+    "lon": 16.828019444444443,
+    "lat": 52.345755555555556,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-ctrl-d000010",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 91057751,
+    "lon": 19.936583333333335,
+    "lat": 50.02911111111111,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06b00147",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 6048838,
+    "lon": 18.361686111111112,
+    "lat": 54.38025833333333,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-ctrl-d000004",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 90831477,
+    "lon": 20.00425,
+    "lat": 50.066944444444445,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06b00125",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 91125784,
+    "lon": 18.958416666666665,
+    "lat": 49.976444444444446,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06b00131",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 31628787,
+    "lon": 17.591388888888886,
+    "lat": 53.151111111111106,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpuh5-000054",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 91114372,
+    "lon": 19.536944444444448,
+    "lat": 51.76061111111111,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06b00137",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 82185679,
+    "lon": 16.972055555555553,
+    "lat": 51.11975,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06b00101",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 83348313,
+    "lon": 16.86163888888889,
+    "lat": 51.14652777777778,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06b00108",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 88819902,
+    "lon": 20.71486111111111,
+    "lat": 49.61745555555556,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06b00112",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 91184735,
+    "lon": 15.255805555555556,
+    "lat": 52.73425,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06b00158",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 82080000,
+    "lon": 19.037794444444447,
+    "lat": 49.839311111111115,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06b00105",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 91125761,
+    "lon": 18.958416666666665,
+    "lat": 49.976444444444446,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06b00130",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 5927987,
+    "lon": 16.066991666666667,
+    "lat": 51.496775,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-ctrl-d000001",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 91179040,
+    "lon": 19.442194444444446,
+    "lat": 51.736444444444444,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06b00163",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 90831400,
+    "lon": 19.656477777777777,
+    "lat": 51.40623611111111,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06b00122",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 7250318,
+    "lon": 21.827955555555555,
+    "lat": 51.39996388888889,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-ctrl-d000031",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 90802169,
+    "lon": 17.041416666666667,
+    "lat": 54.46497222222222,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06b00116",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 8552131,
+    "lon": 20.861222222222224,
+    "lat": 52.03861111111111,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-ctrl-d000036",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 91114385,
+    "lon": 16.912491666666664,
+    "lat": 52.40782222222222,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06b00138",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 91114306,
+    "lon": 19.536944444444448,
+    "lat": 51.76061111111111,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06b00135",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 90831351,
+    "lon": 19.67666666666667,
+    "lat": 51.40602777777778,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06b00120",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 91633448,
+    "lon": 18.85886388888889,
+    "lat": 50.28043888888889,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06b00173",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 6507259,
+    "lon": 20.871719444444444,
+    "lat": 49.96928055555556,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-ctrl-d000023",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 96352275,
+    "lon": 21.827955555555555,
+    "lat": 51.39996388888889,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06a00102",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 91633477,
+    "lon": 23.200805555555554,
+    "lat": 53.14041666666667,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06b00175",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 91184678,
+    "lon": 19.434444444444445,
+    "lat": 51.815749999999994,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06b00156",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 83348289,
+    "lon": 16.93261111111111,
+    "lat": 51.123444444444445,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06b00107",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 91114420,
+    "lon": 16.912491666666664,
+    "lat": 52.40782222222222,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06b00140",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 91058294,
+    "lon": 23.166833333333333,
+    "lat": 53.11841666666667,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06b00153",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 91057708,
+    "lon": 20.64131111111111,
+    "lat": 50.871541666666666,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06b00145",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 91114296,
+    "lon": 20.64131111111111,
+    "lat": 50.871541666666666,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06b00134",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 24687819,
+    "lon": 19.139444444444443,
+    "lat": 52.52388888888889,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpuf4-000001",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 91114273,
+    "lon": 18.528194444444445,
+    "lat": 53.95691666666667,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06b00132",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 8552725,
+    "lon": 20.935352777777776,
+    "lat": 52.363308333333336,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-ctrl-d000026",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 8552241,
+    "lon": 21.11438888888889,
+    "lat": 52.33427777777778,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-ctrl-d000034",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 6289954,
+    "lon": 16.78986666666667,
+    "lat": 53.15022777777778,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-ctrl-d000009",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 13095255,
+    "lon": 22.061111111111114,
+    "lat": 50.57611111111112,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-ctrl-d000056",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 91352745,
+    "lon": 18.47694444444444,
+    "lat": 52.61611111111111,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06b00171",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 28974533,
+    "lon": 19.583619444444444,
+    "lat": 50.2742,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpuh5-000018",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 6143675,
+    "lon": 18.361686111111112,
+    "lat": 54.38025833333333,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-ctrl-d000005",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 31644065,
+    "lon": 22.061111111111114,
+    "lat": 50.57611111111112,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpuf4-000006",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 12796562,
+    "lon": 22.061111111111114,
+    "lat": 50.57611111111112,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-ctrl-d000046",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 101310973,
+    "lon": 15.736266666666666,
+    "lat": 50.90852777777778,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06b00204",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 91184827,
+    "lon": 16.498555555555555,
+    "lat": 50.85388888888889,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06b00111",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 91058201,
+    "lon": 18.78852777777778,
+    "lat": 50.30981944444444,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06b00150",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 12796530,
+    "lon": 21.605,
+    "lat": 50.04944444444444,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-ctrl-d000054",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 6289966,
+    "lon": 16.828019444444443,
+    "lat": 52.345755555555556,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-ctrl-d000011",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 91179161,
+    "lon": 14.500027777777778,
+    "lat": 53.428888888888885,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06b00166",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 91184784,
+    "lon": 19.421111111111113,
+    "lat": 51.780277777777776,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06b00159",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 8552758,
+    "lon": 19.406080555555555,
+    "lat": 51.85626111111111,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-ctrl-d000028",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 91057943,
+    "lon": 19.936583333333335,
+    "lat": 50.02911111111111,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06b00148",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 90831411,
+    "lon": 19.656477777777777,
+    "lat": 51.40623611111111,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06b00123",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 91424352,
+    "lon": 19.536944444444448,
+    "lat": 51.76061111111111,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06b00172",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 91057663,
+    "lon": 19.421111111111113,
+    "lat": 51.780277777777776,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06b00143",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 90831494,
+    "lon": 20.00425,
+    "lat": 50.066944444444445,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06b00127",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 12796545,
+    "lon": 21.605,
+    "lat": 50.04944444444444,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-ctrl-d000055",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 91179059,
+    "lon": 14.500027777777778,
+    "lat": 53.428888888888885,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06b00165",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 12796520,
+    "lon": 21.605,
+    "lat": 50.04944444444444,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-ctrl-d000053",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 91352624,
+    "lon": 21.17941666666667,
+    "lat": 52.25661111111111,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06b00169",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 90802327,
+    "lon": 18.890638888888887,
+    "lat": 50.17811111111111,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06b00119",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 12796569,
+    "lon": 22.061111111111114,
+    "lat": 50.57611111111112,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-ctrl-d000047",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 8552162,
+    "lon": 20.935352777777776,
+    "lat": 52.363308333333336,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-ctrl-d000027",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 6443609,
+    "lon": 18.718055555555555,
+    "lat": 53.0575,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-ctrl-d000014",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 91185013,
+    "lon": 20.48661388888889,
+    "lat": 53.75573333333333,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06b00161",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 82079864,
+    "lon": 19.037794444444447,
+    "lat": 49.839311111111115,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06b00103",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 6443623,
+    "lon": 18.718055555555555,
+    "lat": 53.0575,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-ctrl-d000015",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 88820106,
+    "lon": 20.71486111111111,
+    "lat": 49.61745555555556,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06b00114",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 91184543,
+    "lon": 19.434444444444445,
+    "lat": 51.815749999999994,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06b00154",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 83348018,
+    "lon": 16.498555555555555,
+    "lat": 50.85388888888889,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06b00110",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 9984691,
+    "lon": 20.935352777777776,
+    "lat": 52.363308333333336,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-ctrl-d000043",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 91184921,
+    "lon": 20.48661388888889,
+    "lat": 53.75573333333333,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06b00160",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 12796630,
+    "lon": 22.061111111111114,
+    "lat": 50.57611111111112,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-ctrl-d000048",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 24687831,
+    "lon": 19.139444444444443,
+    "lat": 52.52388888888889,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpuf4-000002",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 91179026,
+    "lon": 19.442194444444446,
+    "lat": 51.736444444444444,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06b00162",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 91057684,
+    "lon": 20.64131111111111,
+    "lat": 50.871541666666666,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06b00144",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 91058233,
+    "lon": 23.200805555555554,
+    "lat": 53.14041666666667,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06b00151",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 82079977,
+    "lon": 19.037794444444447,
+    "lat": 49.839311111111115,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06b00104",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 91114402,
+    "lon": 16.912491666666664,
+    "lat": 52.40782222222222,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06b00139",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 85974175,
+    "lon": 16.972055555555553,
+    "lat": 51.11975,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06b00102",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 91352699,
+    "lon": 19.431150000000002,
+    "lat": 51.06226944444444,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06b00170",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 6048809,
+    "lon": 18.09934722222222,
+    "lat": 54.58087777777778,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-ctrl-d000007",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 91114334,
+    "lon": 19.536944444444448,
+    "lat": 51.76061111111111,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06b00136",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 12796605,
+    "lon": 22.061111111111114,
+    "lat": 50.57611111111112,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-ctrl-d000049",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 5927997,
+    "lon": 16.066991666666667,
+    "lat": 51.496775,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-ctrl-d000002",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 8552222,
+    "lon": 19.406080555555555,
+    "lat": 51.85626111111111,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-ctrl-d000030",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 91058267,
+    "lon": 23.200805555555554,
+    "lat": 53.14041666666667,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06b00152",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 6506669,
+    "lon": 18.617722222222223,
+    "lat": 50.39725,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-ctrl-d000020",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 91179047,
+    "lon": 14.500027777777778,
+    "lat": 53.428888888888885,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06b00164",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 91184600,
+    "lon": 19.434444444444445,
+    "lat": 51.815749999999994,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06b00155",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 12796553,
+    "lon": 22.061111111111114,
+    "lat": 50.57611111111112,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-ctrl-d000045",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 91179270,
+    "lon": 18.573805555555555,
+    "lat": 51.21804166666667,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06b00167",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 90802314,
+    "lon": 18.890638888888887,
+    "lat": 50.17811111111111,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06b00118",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 88820069,
+    "lon": 20.71486111111111,
+    "lat": 49.61745555555556,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06b00113",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 8552968,
+    "lon": 21.11438888888889,
+    "lat": 52.33427777777778,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-ctrl-d000033",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 6289941,
+    "lon": 16.78986666666667,
+    "lat": 53.15022777777778,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-ctrl-d000008",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 91184645,
+    "lon": 15.255805555555556,
+    "lat": 52.73425,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06b00157",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 90831486,
+    "lon": 20.00425,
+    "lat": 50.066944444444445,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06b00126",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 106063998,
+    "lon": 20.935352777777776,
+    "lat": 52.363308333333336,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06b00205",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 90831392,
+    "lon": 19.67666666666667,
+    "lat": 51.40602777777778,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06b00121",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 101310922,
+    "lon": 15.736266666666666,
+    "lat": 50.90852777777778,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-cpu-06b00203",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 6506662,
+    "lon": 18.617722222222223,
+    "lat": 50.39725,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-ctrl-d000019",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 6506621,
+    "lon": 18.832969444444444,
+    "lat": 50.1372,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-ctrl-d000022",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 6507439,
+    "lon": 19.583619444444444,
+    "lat": 50.2742,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-ctrl-d000024",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  },
+  {
+    "id": 12796660,
+    "lon": 22.061111111111114,
+    "lat": 50.57611111111112,
+    "rodzajPomiaru": "PC",
+    "nrSeryjny": "ncar-h-ctrl-d000051",
+    "lok2PktDlugosc": null,
+    "lok2PktSzerokosc": null
+  }
+]
