@@ -22,6 +22,18 @@ from pathlib import Path
 import cv2
 from threading import Thread
 
+CLASS_NAMES = [
+    'person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus', 'train', 'truck', 'boat', 'traffic light',
+    'fire hydrant', 'stop sign', 'parking meter', 'bench', 'bird', 'cat', 'dog', 'horse', 'sheep', 'cow',
+    'elephant', 'bear', 'zebra', 'giraffe', 'backpack', 'umbrella', 'handbag', 'tie', 'suitcase', 'frisbee',
+    'skis', 'snowboard', 'sports ball', 'kite', 'baseball bat', 'baseball glove', 'skateboard', 'surfboard',
+    'tennis racket', 'bottle', 'wine glass', 'cup', 'fork', 'knife', 'spoon', 'bowl', 'banana', 'apple',
+    'sandwich', 'orange', 'broccoli', 'carrot', 'hot dog', 'pizza', 'donut', 'cake', 'chair', 'couch',
+    'potted plant', 'bed', 'dining table', 'toilet', 'tv', 'laptop', 'mouse', 'remote', 'keyboard',
+    'cell phone', 'microwave', 'oven', 'toaster', 'sink', 'refrigerator', 'book', 'clock', 'vase',
+    'scissors', 'teddy bear', 'hair drier', 'toothbrush'
+]
+
 class CameraHandler:
     def __init__(self, src=0):
         self.src = src
@@ -64,7 +76,7 @@ class CameraHandler:
             y_offset = (height - new_img_h) // 2
             padded_image[y_offset:y_offset + new_img_h, x_offset:x_offset + new_img_w] = image_net
             
-            padded_image = cv2.resize(image, (640, 640))
+            #padded_image = cv2.resize(image, (640, 640))
             batch = ([padded_image], [padded_image])
             
 
@@ -88,16 +100,6 @@ def inference_callback(
     bindings_list: list,
     frameNumber: int
 ) -> None:
-    """
-    inference callback to handle inference results and push them to a queue.
-
-    Args:
-        completion_info: Hailo inference completion info.
-        bindings_list (list): Output bindings for each inference.
-        input_batch (list): Original input frames.
-        output_queue (queue.Queue): Queue to push output results to.
-    """
-    print("processed frame number", frameNumber)
     
     if completion_info.exception:
         print(f'Inference error: {completion_info.exception}')
@@ -113,8 +115,16 @@ def inference_callback(
                     for name in bindings._output_names
                 }
 
-        print(result)
-#            output_queue.put((input_batch[i], result))
+
+        #print("\n\n", len(result), len(CLASS_NAMES))
+        for c, res in zip(CLASS_NAMES, result):
+            for obj in res:
+                x, y, w, h, conf = obj
+                print(f"object {c} detected")
+
+        #original, infer, *rest = result
+        #infer = infer[0] if isinstance(infer, list) and len(infer) == 1 else infer
+    
 
 
 def main() -> None:
