@@ -35,8 +35,9 @@ CLASS_NAMES = [
 ]
 
 class CameraHandler:
-    def __init__(self, src=0):
+    def __init__(self, ug, src=0):
         self.src = src
+        self.ug = ug
         self.modelPath = "/usr/share/hailo-models/yolov8s_h8.hef"
         self.frameNumber = 0
         self.thread = Thread(target=self._run_capture, daemon=True)
@@ -82,8 +83,9 @@ class CameraHandler:
 
             # Prepare the callback for handling the inference result
             inference_callback_fn = partial(
-                inference_callback,
-                frameNumber=self.frameNumber
+                self.inference_callback,
+                frameNumber=self.frameNumber,
+                image_raw = image.copy()
             )
             hailo_inference.run(batch, inference_callback_fn)
 
@@ -95,41 +97,123 @@ class CameraHandler:
 
 
 
-def inference_callback(
-    completion_info,
-    bindings_list: list,
-    frameNumber: int
-) -> None:
+    def inference_callback(
+            self,
+        completion_info,
+        bindings_list: list,
+        frameNumber: int,
+        image_raw
+    ) -> None:
+        
+        if completion_info.exception:
+            print(f'Inference error: {completion_info.exception}')
+        else:
+            for i, bindings in enumerate(bindings_list):
+                if len(bindings._output_names) == 1:
+                    result = bindings.output().get_buffer()
+                else:
+                    result = {
+                        name: np.expand_dims(
+                            bindings.output(name).get_buffer(), axis=0
+                        )
+                        for name in bindings._output_names
+                    }
+
+
+            hh, ww, _ = image_raw.shape
+            #print("\n\n", len(result), len(CLASS_NAMES))
+#            for c, res in zip(CLASS_NAMES, result):
+#                for obj in res:
+#                    mult = [hh, ww, hh, ww, 1]
+#                    y, x, h, w, _ = [int(z * mult[i]) for i, z in enumerate(obj)]
+#                    conf = obj[4]
+#                    if(conf > 0.5):
+#                        image_raw = cv2.rectangle(image_raw, (x-w//2, y-h//2), (x+w//2, y+h//2), (0, 255, 0), 2)
+#                        image_raw = cv2.putText(image_raw, c, (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 3, cv2.LINE_AA)
+#                    else:
+#                        print(conf)
+
+
+
+
+            for c, res in zip(CLASS_NAMES, result):
+                for obj in res:
+                    mult = [hh, ww, hh, ww, 1]
+                    y, x, y2, x2, _ = [int(z * mult[i]) for i, z in enumerate(obj)]
+                    conf = obj[4]
+                    if(conf > 0.5):
+                        image_raw = cv2.rectangle(image_raw, (x, y), (x2, y2), (0, 255, 0), 2)
+                        image_raw = cv2.putText(image_raw, c, (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 3, cv2.LINE_AA)
+                    else:
+                        print(conf)
+
+
+            
+            self.ug.newFrame(image_raw)
+            #cv2.imwrite("output.png", image_raw)
+            #original, infer, *rest = result
+            #infer = infer[0] if isinstance(infer, list) and len(infer) == 1 else infer
     
-    if completion_info.exception:
-        print(f'Inference error: {completion_info.exception}')
-    else:
-        for i, bindings in enumerate(bindings_list):
-            if len(bindings._output_names) == 1:
-                result = bindings.output().get_buffer()
-            else:
-                result = {
-                    name: np.expand_dims(
-                        bindings.output(name).get_buffer(), axis=0
-                    )
-                    for name in bindings._output_names
-                }
 
 
-        #print("\n\n", len(result), len(CLASS_NAMES))
-        for c, res in zip(CLASS_NAMES, result):
-            for obj in res:
-                x, y, w, h, conf = obj
-                print(f"object {c} detected")
 
-        #original, infer, *rest = result
-        #infer = infer[0] if isinstance(infer, list) and len(infer) == 1 else infer
-    
+
+
+
+from nicegui import ui, app
+from fastapi.responses import Response
+import time
+import threading
+import numpy as np
+import cv2
+
+
+class UiGen:
+    def __init__(self):
+        self.controls = {}
+        self.resolution = [1280, 720]
+        self.lastImage = np.empty((self.resolution[1], self.resolution[0], 3))
+        self.lastImage[:] = 255
+        self.spawnGui()
+        
+    def run(self):
+        self.t = threading.Thread(target=self.host, daemon=True)
+        self.t.start()
+
+    def host(self):
+        ui.run(reload=False, show=False)
+
+    def newFrame(self, image):
+        self.lastImage = image
+
+    def spawnGui(self):
+        dark = ui.dark_mode()
+        dark.enable()        
+        
+        with ui.card() as card:
+            with ui.row():
+                style = f"width: {self.resolution[0]}px; height: {self.resolution[1]}px; object-fit: contain;"
+                self.controls["image"] = ui.interactive_image().classes("border").style(style)  # , size=(self.resolution[0], self.resolution[1]))#.classes('w-full h-full')
+            with ui.row().classes("w-full"):
+                pass
+        ui.timer(interval=0.03, callback=lambda: self.controls["image"].set_source(f'/video/frame?{time.time()}'))
+
+        @app.get("/video/frame", response_class=Response)
+        def grabVideoFrame() -> Response:
+            _, raw = cv2.imencode(".jpg", self.lastImage)
+            return Response(content=raw.tobytes(), media_type="image/jpg")
+
+
 
 
 def main() -> None:
     import time
-    ch = CameraHandler()
+    ug = UiGen()
+    ch = CameraHandler(ug)
+
+    ug.run()
+
+
     while(1):
         time.sleep(1)
 
