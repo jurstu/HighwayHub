@@ -71,7 +71,8 @@ class CameraHandler:
             scale = min(width / img_w, height / img_h)
             new_img_w, new_img_h = int(img_w * scale), int(img_h * scale)
             image_net = cv2.resize(image, (new_img_w, new_img_h), interpolation=cv2.INTER_CUBIC)
-            print("image_net shape", image_net.shape)
+            #print("image_net shape", image_net.shape)
+            
             padded_image = np.full((height, width, 3), (114, 114, 114), dtype=np.uint8)
             x_offset = (width - new_img_w) // 2
             y_offset = (height - new_img_h) // 2
@@ -144,8 +145,7 @@ class CameraHandler:
                     if(conf > 0.5):
                         image_raw = cv2.rectangle(image_raw, (x, y), (x2, y2), (0, 255, 0), 2)
                         image_raw = cv2.putText(image_raw, c, (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 3, cv2.LINE_AA)
-                    else:
-                        print(conf)
+
 
 
             
