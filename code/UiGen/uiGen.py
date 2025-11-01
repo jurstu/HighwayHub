@@ -178,8 +178,8 @@ class UiGen:
 
 
     def loadRadars(self):
-        if(self.radarsLoaded):
-            return
+        #if(self.radarsLoaded):
+        #    return
         
         try:
             with open("assets/canard_detailed_data.json", "r") as f:
@@ -255,7 +255,7 @@ class UiGen:
                                                 additional_resources=['/rotatedMarker.js']
                                                 ).classes('w-full h-[calc(33vh)]')
             self.controls["theMap"].on('map-mousemove', self.handleMouseMove)
-
+            self.loadRadars()
             #while(1):
             #    if(self.controls["theMap"].initialized()):
             #        break
