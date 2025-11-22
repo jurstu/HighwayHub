@@ -14,16 +14,21 @@ from DataSource import InformationCenter
 import json
 from .carListPage import CarListPage
 from .videoLivePage import VideoLivePage
+from functools import partial
 
 logger = getLogger(__name__)
 
 class UiGen:
     def __init__(self):
         self.controls = {}
-        self.updatePositionMessage = Event[float, float, float]()
-        self.lon = 21
-        self.lat = 51
+        self.updatePositionMessage = Event()
+        
+        self.state = EmptyClass()
+        self.state.lon = 0
+        self.state.lat = 0
+
         self.ic = InformationCenter()
+        self.loadSettingsFromParams(self.ic.getValue("PARAMS"))
 
 
     def run(self):
@@ -36,9 +41,11 @@ class UiGen:
 
     def host(self):
         with redirect_stdout(StdoutInterceptor("." + __name__ + ".NiceGUI", self.ngStartedCb)):
-            ui.run(self.idk, reload=False, show=False)
+            ui.run(self.root, reload=False, show=False)
 
-    def idk(self):
+    def root(self):
+        
+        
         with ui.footer().classes("bg-gray-800 text-white p-2 items-stretch"):  # force vertical stretch
             with ui.row().classes("w-full items-stretch"):
                 with ui.card().classes("h-full px-4 rounded bg-slate-500") as card:
@@ -51,16 +58,45 @@ class UiGen:
                         self.controls["GPS card alt"] = ui.label("")
                 with ui.card().classes("h-full px-4 rounded bg-slate-500 flex items-center justify-center") as card:
                     self.controls["BATT card"] = card
-                    with ui.column().style("gap: 0.1rem").classes("h-full items-center justify-center") as col:
-                        self.controls["BATT card StatusCol"] = col
+                    with ui.column().style("gap: 0.1rem").classes("h-full items-center justify-center"):
                         self.controls["BATT card StatusLab"] = ui.label("BATTERY STATUS")
                         self.controls["BATT card percent"] = ui.label("")
                         self.controls["BATT card status"] = ui.label("")
                         self.controls["BATT card noneLabel"] = ui.label("")
 
+        self.updatePositionMessage.subscribe(partial(self.updateGpsCard, self.controls.copy()))
         ui.sub_pages({
             "/": self.spawnGui
         })
+
+    def updateGpsData(self, data):
+        self.updatePositionMessage.emit(data)
+
+    def updateGpsCard(self, controls, data):
+        controls["GPS card"].classes(remove="bg-green-500 bg-yellow-500 bg-red-500 bg-slate-500")
+        status = data.fix
+        if status == 0:
+            controls["GPS card"].classes("px-4 py-1 rounded bg-red-500")
+        else:
+            controls["GPS card"].classes("px-4 py-1 rounded bg-green-500")
+            controls[f"GPS card lat"].text = "{: 3.5f}°".format(data.lat)
+            controls[f"GPS card lon"].text = "{: 3.5f}°".format(data.lon)
+            controls[f"GPS card alt"].text = "{: 3.1f}m".format(data.alt)
+
+            #cc = self.ic.getValue("car-centered", False)
+            #if(cc):
+            #    controls["map"].set_center((data.lat, data.lon))
+
+    def updateBatteryData(self, data):
+        pass
+
+
+    def loadSettingsFromParams(self, params):
+        self.state.hh = params["firstVideoSettings"]["hh"]
+        self.state.ww = params["firstVideoSettings"]["ww"]
+        self.state.latestFrameJpeg = np.zeros((self.state.hh, self.state.ww, 3), dtype=np.uint8)
+        _, self.state.latestFrameJpeg = cv2.imencode(".jpg", self.state.latestFrameJpeg)
+        self.state.latestFrameJpeg = self.state.latestFrameJpeg.tobytes()
 
     
     def handleMouseMove(self, e: events.GenericEventArguments):
@@ -70,12 +106,15 @@ class UiGen:
         watcherObject.getDistances([lat, lon])
 
     def changePosition(self, lat, lon, angle):
-        self.lat = lat
-        self.lon = lon
+        self.state.lat = lat
+        self.state.lon = lon
         self.updatePositionMessage.emit(lat, lon, angle)
 
     
-    def modifyCarMarker(self, marker, lat, lon, angle):
+    def modifyCarMarker(self, marker, data):
+        lat = data.lat
+        lon = data.lon
+        angle = data.COG
         marker.move(lat, lon)
         marker.run_method(':setRotationAngle', "{:d}".format(angle))
         marker.run_method(':setIcon', 'L.icon({iconUrl: "/car.png", iconSize: [32, 32], iconAnchor: [16, 16]})')
@@ -85,8 +124,8 @@ class UiGen:
         dark.enable()
         self.controls["map"] = ui.leaflet(center=[52, 21], zoom=9, additional_resources=['/rotatedMarker.js']).classes("w-200 h-200")
         self.loadRadars()
-        self.controls["carMarker"] = self.controls["map"].marker(latlng=(self.lat, self.lon), options={'rotationAngle': 0, "rotationOrigin": "center center"})
-        from functools import partial
+        self.controls["carMarker"] = self.controls["map"].marker(latlng=(self.state.lat, self.state.lon), options={'rotationAngle': 0, "rotationOrigin": "center center"})
+
         self.updatePositionMessage.subscribe(partial(self.modifyCarMarker, self.controls["carMarker"]))
         #self.updatePositionMessage.subscribe(lambda lat, lon: self.updatePositionData(self.controls["carMarker"], lat, lon))
 
@@ -107,6 +146,11 @@ class UiGen:
         @app.get("/rotatedMarker.js")
         def serve_dynamic_image():
             return FileResponse("./UiGen/leaflet.rotatedMarker.js", media_type='text/javascript')
+
+
+
+
+
 
     def loadRadars(self):
         try:
