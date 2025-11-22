@@ -74,16 +74,17 @@ class UiGen:
         self.updatePositionMessage.emit(lat, lon)
 
     
-    def updatePositionData(self, lat, lon):
-        self.controls["carMarker"].move(lat, lon)
+    def updatePositionData(self, marker, lat, lon):
+        marker.move(lat, lon)
 
     def spawnGui(self):
         dark = ui.dark_mode()
         dark.enable()
         self.controls["map"] = ui.leaflet(center=[52, 21], zoom=9).classes("w-200 h-200")
         self.controls["carMarker"] = self.controls["map"].marker(latlng=(self.lat, self.lon))
-        self.updatePositionMessage.subscribe(self.controls["carMarker"].move)
-
+        from functools import partial
+        self.updatePositionMessage.subscribe(partial(self.updatePositionData, self.controls["carMarker"]))
+        #self.updatePositionMessage.subscribe(lambda lat, lon: self.updatePositionData(self.controls["carMarker"], lat, lon))
 
 
         @app.get("/video/frame", response_class=Response)
