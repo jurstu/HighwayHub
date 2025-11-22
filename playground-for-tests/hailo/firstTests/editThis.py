@@ -39,6 +39,7 @@ class CameraHandler:
         self.src = src
         self.ug = ug
         self.modelPath = "/usr/share/hailo-models/yolov8s_h8.hef"
+        self.modelPath = "/usr/share/hailo-models/yolov5m.har"
         self.frameNumber = 0
         self.thread = Thread(target=self._run_capture, daemon=True)
         self.thread.start()
