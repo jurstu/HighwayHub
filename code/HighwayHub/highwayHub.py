@@ -57,7 +57,7 @@ class HighwayHub:
             if(isThisX86()):
                 pass
             else:
-                #self.battMonitor.updateData()
+                self.battMonitor.updateData()
                 self.uiGen.updateGpsData(a)
 
             time.sleep(0.1)

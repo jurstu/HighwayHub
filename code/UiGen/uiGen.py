@@ -22,13 +22,14 @@ class UiGen:
     def __init__(self):
         self.controls = {}
         self.updatePositionMessage = Event()
+        self.updateBatteryMessage = Event()
         
         self.state = EmptyClass()
         self.state.lon = 0
         self.state.lat = 0
 
         self.ic = InformationCenter()
-        self.loadSettingsFromParams(self.ic.getValue("PARAMS"))
+        #self.loadSettingsFromParams(self.ic.getValue("PARAMS"))
 
 
     def run(self):
@@ -44,8 +45,6 @@ class UiGen:
             ui.run(self.root, reload=False, show=False)
 
     def root(self):
-        
-        
         with ui.footer().classes("bg-gray-800 text-white p-2 items-stretch"):  # force vertical stretch
             with ui.row().classes("w-full items-stretch"):
                 with ui.card().classes("h-full px-4 rounded bg-slate-500") as card:
@@ -53,18 +52,20 @@ class UiGen:
                     with ui.column().style("gap: 0.1rem").classes("h-full items-center justify-center") as col:
                         self.controls["GPS card StatusCol"] = col
                         self.controls["GPS card StatusLab"] = ui.label("GPS STATUS")
-                        self.controls["GPS card lat"] = ui.label("")
-                        self.controls["GPS card lon"] = ui.label("")
-                        self.controls["GPS card alt"] = ui.label("")
+                        self.controls["GPS card lat"] = ui.label(" ")
+                        self.controls["GPS card lon"] = ui.label(" ")
+                        self.controls["GPS card alt"] = ui.label(" ")
                 with ui.card().classes("h-full px-4 rounded bg-slate-500 flex items-center justify-center") as card:
                     self.controls["BATT card"] = card
                     with ui.column().style("gap: 0.1rem").classes("h-full items-center justify-center"):
                         self.controls["BATT card StatusLab"] = ui.label("BATTERY STATUS")
-                        self.controls["BATT card percent"] = ui.label("")
-                        self.controls["BATT card status"] = ui.label("")
-                        self.controls["BATT card noneLabel"] = ui.label("")
+                        self.controls["BATT card percent"] = ui.label(" ")
+                        self.controls["BATT card status"] = ui.label(" ")
+                        self.controls["BATT card noneLabel"] = ui.label(" ")
 
         self.updatePositionMessage.subscribe(partial(self.updateGpsCard, self.controls.copy()))
+        self.updateBatteryMessage.subscribe(partial(self.updateBatteryCard, self.controls.copy()))
+
         ui.sub_pages({
             "/": self.spawnGui
         })
@@ -87,30 +88,32 @@ class UiGen:
             #if(cc):
             #    controls["map"].set_center((data.lat, data.lon))
 
+
+
+
+
+
     def updateBatteryData(self, data):
-        pass
+        self.updateBatteryMessage.emit(data)
 
+    def updateBatteryCard(self, controls, data):
 
-    def loadSettingsFromParams(self, params):
-        self.state.hh = params["firstVideoSettings"]["hh"]
-        self.state.ww = params["firstVideoSettings"]["ww"]
-        self.state.latestFrameJpeg = np.zeros((self.state.hh, self.state.ww, 3), dtype=np.uint8)
-        _, self.state.latestFrameJpeg = cv2.imencode(".jpg", self.state.latestFrameJpeg)
-        self.state.latestFrameJpeg = self.state.latestFrameJpeg.tobytes()
-
-    
-    def handleMouseMove(self, e: events.GenericEventArguments):
-        lat = e.args['latlng']['lat']
-        lon = e.args['latlng']['lng']
-        watcherObject = self.ic.getValue("RadarWatcherObject")
-        watcherObject.getDistances([lat, lon])
-
-    def changePosition(self, lat, lon, angle):
-        self.state.lat = lat
-        self.state.lon = lon
-        self.updatePositionMessage.emit(lat, lon, angle)
-
-    
+        controls["BATT card"].classes(remove="bg-green-500 bg-yellow-500 bg-red-500 bg-slate-500")
+        controls[f"BATT card percent"].text = "{: 2d}%".format(data.battPercent)
+        controls[f"BATT card status"].text = "{}".format(data.chargingStatus)
+        if(data.battCurrent > 0):
+            controls["BATT card noneLabel"].text = f"time to full {data.timeToFull}"
+        else:
+            controls["BATT card noneLabel"].text = f"time to empty {data.timeToEmpty}"
+        perc = data.battPercent
+        if(perc > 50):
+            controls["BATT card"].classes("px-4 py-1 rounded bg-green-500")
+        elif(perc > 20):
+            controls["BATT card"].classes("px-4 py-1 rounded bg-yellow-500")
+        else:
+            controls["BATT card"].classes("px-4 py-1 rounded bg-red-500")
+        
+        
     def modifyCarMarker(self, marker, data):
         lat = data.lat
         lon = data.lon
@@ -123,16 +126,7 @@ class UiGen:
         dark = ui.dark_mode()
         dark.enable()
         self.controls["map"] = ui.leaflet(center=[52, 21], zoom=9, additional_resources=['/rotatedMarker.js']).classes("w-200 h-200")
-        self.loadRadars()
-        self.controls["carMarker"] = self.controls["map"].marker(latlng=(self.state.lat, self.state.lon), options={'rotationAngle': 0, "rotationOrigin": "center center"})
-
-        self.updatePositionMessage.subscribe(partial(self.modifyCarMarker, self.controls["carMarker"]))
         #self.updatePositionMessage.subscribe(lambda lat, lon: self.updatePositionData(self.controls["carMarker"], lat, lon))
-
-
-        @app.get("/video/frame", response_class=Response)
-        def grabVideoFrame() -> Response:
-            return Response(content=self.state.latestFrameJpeg, media_type="image/jpg")
 
         @app.get("/car.png")
         def serve_dynamic_image():
@@ -147,6 +141,13 @@ class UiGen:
         def serve_dynamic_image():
             return FileResponse("./UiGen/leaflet.rotatedMarker.js", media_type='text/javascript')
 
+        self.loadRadars()
+        self.controls["carMarker"] = self.controls["map"].marker(latlng=(self.state.lat, self.state.lon), options={'rotationAngle': 0, "rotationOrigin": "center center"})
+
+        self.updatePositionMessage.subscribe(partial(self.modifyCarMarker, self.controls["carMarker"]))
+
+        self.controls["carMarker"].run_method(':setRotationAngle', "{:d}".format(0))
+        self.controls["carMarker"].run_method(':setIcon', 'L.icon({iconUrl: "/car.png", iconSize: [32, 32], iconAnchor: [16, 16]})')
 
 
 
@@ -174,7 +175,6 @@ class UiGen:
             lon = recData["lon"]
             if("urzadzenie" in recData):
                 devType = recData["urzadzenie"]["rodzajPomiaru"]
-                controlsKey = f"radar_{k}"
                 color = "#FFFFFF"
                 if(devType == "PO"):
                     color = "#0000C0"
@@ -188,6 +188,9 @@ class UiGen:
                 elif(devType == "PP"):
                     color = "#c0c000"
                 m.generic_layer(name='circle', args=[[lat, lon], {"radius": detectionRadius, "color": color, "fill": False}])
+                radarMarker = m.marker(latlng=(lat, lon), options={'rotationAngle': 0, "rotationOrigin": "center center"})
+                radarMarker.run_method(':setIcon', 'L.icon({iconUrl: "/radar.png", iconSize: [32, 32], iconAnchor: [16, 16]})')
+
 
 if __name__ == "__main__":
     from .uiGen import UiGen
