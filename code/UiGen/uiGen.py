@@ -20,9 +20,10 @@ logger = getLogger(__name__)
 class UiGen:
     def __init__(self):
         self.controls = {}
-        self.updatePositionMessage = Event[float, float]()
+        self.updatePositionMessage = Event[float, float, float]()
         self.lon = 21
         self.lat = 51
+        self.ic = InformationCenter()
 
 
     def run(self):
@@ -68,22 +69,25 @@ class UiGen:
         watcherObject = self.ic.getValue("RadarWatcherObject")
         watcherObject.getDistances([lat, lon])
 
-    def changePosition(self, lat, lon):
+    def changePosition(self, lat, lon, angle):
         self.lat = lat
         self.lon = lon
-        self.updatePositionMessage.emit(lat, lon)
+        self.updatePositionMessage.emit(lat, lon, angle)
 
     
-    def updatePositionData(self, marker, lat, lon):
+    def modifyCarMarker(self, marker, lat, lon, angle):
         marker.move(lat, lon)
+        marker.run_method(':setRotationAngle', "{:d}".format(angle))
+        marker.run_method(':setIcon', 'L.icon({iconUrl: "/car.png", iconSize: [32, 32], iconAnchor: [16, 16]})')
 
     def spawnGui(self):
         dark = ui.dark_mode()
         dark.enable()
-        self.controls["map"] = ui.leaflet(center=[52, 21], zoom=9).classes("w-200 h-200")
-        self.controls["carMarker"] = self.controls["map"].marker(latlng=(self.lat, self.lon))
+        self.controls["map"] = ui.leaflet(center=[52, 21], zoom=9, additional_resources=['/rotatedMarker.js']).classes("w-200 h-200")
+        self.loadRadars()
+        self.controls["carMarker"] = self.controls["map"].marker(latlng=(self.lat, self.lon), options={'rotationAngle': 0, "rotationOrigin": "center center"})
         from functools import partial
-        self.updatePositionMessage.subscribe(partial(self.updatePositionData, self.controls["carMarker"]))
+        self.updatePositionMessage.subscribe(partial(self.modifyCarMarker, self.controls["carMarker"]))
         #self.updatePositionMessage.subscribe(lambda lat, lon: self.updatePositionData(self.controls["carMarker"], lat, lon))
 
 
@@ -104,7 +108,42 @@ class UiGen:
         def serve_dynamic_image():
             return FileResponse("./UiGen/leaflet.rotatedMarker.js", media_type='text/javascript')
 
-        self.rendered = True
+    def loadRadars(self):
+        try:
+            with open("assets/canard_detailed_data.json", "r") as f:
+                data = json.load(f)
+            
+        except Exception as e:
+            logger.warning(f"couldn't load canard data {e}")
+            data = {}
+
+        wo = self.ic.getValue("RadarWatcherObject")
+        if(wo is not None):
+            detectionRadius = wo.detectionEntryRadius
+        else:
+            detectionRadius = 500
+
+        m = self.controls["map"]
+        for k, recData in data.items():            
+            # we actually don't need the key, but wth
+            lat = recData["lat"]
+            lon = recData["lon"]
+            if("urzadzenie" in recData):
+                devType = recData["urzadzenie"]["rodzajPomiaru"]
+                controlsKey = f"radar_{k}"
+                color = "#FFFFFF"
+                if(devType == "PO"):
+                    color = "#0000C0"
+                    endpointLoc = recData["urzadzenie"]["lokalizacjaDrugiegoPunktu"].split(";")
+                    lon2, lat2 = [float(x) for x in endpointLoc]
+                    #logger.debug(f"{lat2} {lon2}")
+                    m.generic_layer(name='circle', args=[[lat2, lon2], {"radius": detectionRadius+10, "color": color, "fill": False}])
+                    m.generic_layer(name='polyline', args=[[[lat, lon],[lat2, lon2]], {"color": "purple"}]) 
+                elif(devType == "PC"):
+                    color = "#c00000"
+                elif(devType == "PP"):
+                    color = "#c0c000"
+                m.generic_layer(name='circle', args=[[lat, lon], {"radius": detectionRadius, "color": color, "fill": False}])
 
 if __name__ == "__main__":
     from .uiGen import UiGen
@@ -116,8 +155,8 @@ if __name__ == "__main__":
     while 1:
         time.sleep(0.1)
         logger.info("changing position")
-        lat = 52 + 0.3*np.sin((i/100)/np.pi)
-        lon = 21 + 0.3*np.cos((i/100)/np.pi)
+        lat = 52 + 0.3*np.sin((i/100)*np.pi)
+        lon = 21 + 0.3*np.cos((i/100)*np.pi)
         
-        ug.changePosition(lat, lon)
-        i += 10
+        ug.changePosition(lat, lon, int(-i*180/100))
+        i += 1
