@@ -10,13 +10,25 @@ Code for an embedded device in a car ;)
     - [X] voltage, current, charging/not-charging
     - [X] time to depletion
 
+- [ ] Polish speed cameras data
+    - [ ] sound warning
+    - [ ] detecting incoming speedCamera
+    - [ ] calculating average speed on distance measurements
+
+- [ ] fun data
+    - [X] last 3 minutes highest and lowest space 
+    - [ ] last 3 minutes of speedOverGround
+    - [ ] angles of travel in NED frame 
+    - [ ] option to start a timer and calculate distances
+    - [ ] gather acceleration data for Kalmann and ui reporting? 
+
 - [ ] ui using nicegui
     - [X] car on a map
-    - [ ] angles of travel in NED frame 
-    - [ ] last 800m highest and lowest space 
+    - [X] speed cameras shown
+    
 
 - [ ] camera on the back
-    - [X] video on nicegui
+    - [ ] video on nicegui
     - [ ] plate recognition
     - [ ] snapshots of cars+drivers
     - [ ] recording, maybe

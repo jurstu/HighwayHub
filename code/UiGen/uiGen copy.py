@@ -260,7 +260,6 @@ class UiGen:
             #    if(self.controls["theMap"].initialized()):
             #        break
             
-
             with ui.card().classes('w-full bg-gray-100 h-[calc(33vh)]'):
                 self.controls["elevationChart"] = ui.echart({
                     "animation": False,
@@ -284,8 +283,6 @@ class UiGen:
                         ui.icon("camera").classes("text-white")
                         ui.link('  go to camera', '/video-live')
                         
-
-
                     with ui.button().props("flat").classes("flex-1 bg-green-600 text-white hover:bg-green-700") as plateListButton:
                         ui.icon("fingerprint").classes("text-white")
                         ui.link('  go to seen cars', '/car-list')

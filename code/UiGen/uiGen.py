@@ -23,6 +23,7 @@ class UiGen:
         self.controls = {}
         self.updatePositionMessage = Event()
         self.updateBatteryMessage = Event()
+        self.updateElevationMessage = Event()
         
         self.state = EmptyClass()
         self.state.lon = 0
@@ -70,6 +71,13 @@ class UiGen:
             "/": self.spawnGui
         })
 
+    def updateElevationData(self, data):
+        self.updateElevationMessage.emit(data)
+        
+    def updateElevationCard(self, controls, data):
+        controls["elevationChart"].options['series'][0]['data'] = data
+        controls["elevationChart"].update()
+
     def updateGpsData(self, data):
         self.updatePositionMessage.emit(data)
 
@@ -84,9 +92,7 @@ class UiGen:
             controls[f"GPS card lon"].text = "{: 3.5f}°".format(data.lon)
             controls[f"GPS card alt"].text = "{: 3.1f}m".format(data.alt)
 
-            #cc = self.ic.getValue("car-centered", False)
-            #if(cc):
-            #    controls["map"].set_center((data.lat, data.lon))
+            
 
 
 
@@ -97,36 +103,67 @@ class UiGen:
         self.updateBatteryMessage.emit(data)
 
     def updateBatteryCard(self, controls, data):
-
         controls["BATT card"].classes(remove="bg-green-500 bg-yellow-500 bg-red-500 bg-slate-500")
         controls[f"BATT card percent"].text = "{: 2d}%".format(data.battPercent)
         controls[f"BATT card status"].text = "{}".format(data.chargingStatus)
-        if(data.battCurrent > 0):
+        if(data.battCurrent < 0):
             controls["BATT card noneLabel"].text = f"time to full {data.timeToFull}"
         else:
             controls["BATT card noneLabel"].text = f"time to empty {data.timeToEmpty}"
         perc = data.battPercent
-        if(perc > 50):
-            controls["BATT card"].classes("px-4 py-1 rounded bg-green-500")
-        elif(perc > 20):
-            controls["BATT card"].classes("px-4 py-1 rounded bg-yellow-500")
+        if(data.allGood):
+            if(perc > 50):
+                controls["BATT card"].classes("px-4 py-1 rounded bg-green-500")
+            elif(perc > 20):
+                controls["BATT card"].classes("px-4 py-1 rounded bg-yellow-500")
+            else:
+                controls["BATT card"].classes("px-4 py-1 rounded bg-red-500")
         else:
             controls["BATT card"].classes("px-4 py-1 rounded bg-red-500")
+            controls[f"BATT card percent"].text = ""
+            controls[f"BATT card status"].text = "no data from controller"
+            controls["BATT card noneLabel"].text = f" "
+
         
-        
-    def modifyCarMarker(self, marker, data):
+    def modifyCarMarker(self, controls, data):
+        marker = controls["carMarker"]
+        m = controls["map"]
         lat = data.lat
         lon = data.lon
         angle = data.COG
         marker.move(lat, lon)
         marker.run_method(':setRotationAngle', "{:d}".format(angle))
         marker.run_method(':setIcon', 'L.icon({iconUrl: "/car.png", iconSize: [32, 32], iconAnchor: [16, 16]})')
+        cc = self.ic.getValue("car-centered", False)
+        if(cc):
+            m.set_center((data.lat, data.lon))
+
+
 
     def spawnGui(self):
         dark = ui.dark_mode()
         dark.enable()
-        self.controls["map"] = ui.leaflet(center=[52, 21], zoom=9, additional_resources=['/rotatedMarker.js']).classes("w-200 h-200")
-        #self.updatePositionMessage.subscribe(lambda lat, lon: self.updatePositionData(self.controls["carMarker"], lat, lon))
+        self.controls["map"] = ui.leaflet(center=[52, 21], zoom=9, additional_resources=['/rotatedMarker.js']).classes("w-150 h-150")
+        #elf.updatePositionMessage.subscribe(lambda lat, lon: self.updatePositionData(self.controls["carMarker"], lat, lon))
+
+        with ui.card().classes('w-150 bg-gray-100 h-100'):
+            self.controls["elevationChart"] = ui.echart({
+                "animation": False,
+                "legend": {"data": ["elevation [m]"]},
+                "xAxis": {"type": "category"},
+                "yAxis": {
+                    "type": "value",
+                    "scale": True,
+                    "axisLabel": {
+                        #":formatter": "function (value) { return Number.isInteger(value) ? value : ''; }"
+                    },
+                },
+                "series": [
+                    {"name": "elevation [m]", "color": "blue", "type": "line", "data": []}
+                ],
+            }).classes("w-full h-full")
+
+        self.updateElevationMessage.subscribe(partial(self.updateElevationCard, self.controls.copy()))
 
         @app.get("/car.png")
         def serve_dynamic_image():
@@ -144,7 +181,7 @@ class UiGen:
         self.loadRadars()
         self.controls["carMarker"] = self.controls["map"].marker(latlng=(self.state.lat, self.state.lon), options={'rotationAngle': 0, "rotationOrigin": "center center"})
 
-        self.updatePositionMessage.subscribe(partial(self.modifyCarMarker, self.controls["carMarker"]))
+        self.updatePositionMessage.subscribe(partial(self.modifyCarMarker, self.controls.copy()))
 
         self.controls["carMarker"].run_method(':setRotationAngle', "{:d}".format(0))
         self.controls["carMarker"].run_method(':setIcon', 'L.icon({iconUrl: "/car.png", iconSize: [32, 32], iconAnchor: [16, 16]})')
@@ -188,8 +225,12 @@ class UiGen:
                 elif(devType == "PP"):
                     color = "#c0c000"
                 m.generic_layer(name='circle', args=[[lat, lon], {"radius": detectionRadius, "color": color, "fill": False}])
-                radarMarker = m.marker(latlng=(lat, lon), options={'rotationAngle': 0, "rotationOrigin": "center center"})
-                radarMarker.run_method(':setIcon', 'L.icon({iconUrl: "/radar.png", iconSize: [32, 32], iconAnchor: [16, 16]})')
+                m.generic_layer(name='circle', args=[[lat, lon], {"radius": 10, "color": color, "fill": True}])
+                #radarMarker = m.marker(latlng=(lat, lon), options={'rotationAngle': 0, "rotationOrigin": "center center"})
+                # the icons don't change properly here
+                #radarMarker.run_method(':setIcon', 'L.icon({iconUrl: "/radar.png", iconSize: [32, 32], iconAnchor: [16, 16]})')
+
+                #controlsKey = f"radar_{k}"
 
 
 if __name__ == "__main__":
