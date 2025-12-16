@@ -32,7 +32,10 @@ class HighwayHub:
 
         self.gpsHandler.nmeaParser.newPositionSignal.addReceiver(self.uiGen.updateGpsData)
         self.gpsHandler.nmeaParser.newPositionSignal.addReceiver(self.waypointAnalyzer.feedPoint)
+        self.gpsHandler.nmeaParser.newPositionSignal.addReceiver(self.radarWatcher.feedPoint)
+        
         self.waypointAnalyzer.newElevationDataSignal.addReceiver(self.uiGen.updateElevationData)
+        
         if(isThisX86()):
             pass
         else:

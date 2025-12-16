@@ -18,6 +18,7 @@ from functools import partial
 
 logger = getLogger(__name__)
 
+
 class UiGen:
     def __init__(self):
         self.controls = {}
@@ -157,25 +158,26 @@ class UiGen:
     def spawnGui(self):
         dark = ui.dark_mode()
         dark.enable()
-        self.controls["map"] = ui.leaflet(center=[52, 21], zoom=9, additional_resources=['/rotatedMarker.js']).classes("w-150 h-150")
-        #elf.updatePositionMessage.subscribe(lambda lat, lon: self.updatePositionData(self.controls["carMarker"], lat, lon))
+        with ui.column().classes("w-full gap-2").style("width: 100vw; max-width: 100%;"):
+            self.controls["map"] = ui.leaflet(center=[52, 21], zoom=9, additional_resources=['/rotatedMarker.js']).classes("w-full").style("width: 100%; height: 60vh; min-height: 320px; max-height: 700px;")
+            #elf.updatePositionMessage.subscribe(lambda lat, lon: self.updatePositionData(self.controls["carMarker"], lat, lon))
 
-        with ui.card().classes('w-150 bg-gray-100 h-100'):
-            self.controls["elevationChart"] = ui.echart({
-                "animation": False,
-                "legend": {"data": ["elevation [m]"]},
-                "xAxis": {"type": "category"},
-                "yAxis": {
-                    "type": "value",
-                    "scale": True,
-                    "axisLabel": {
-                        #":formatter": "function (value) { return Number.isInteger(value) ? value : ''; }"
+            with ui.card().classes('w-full bg-gray-100').style("min-height: 260px; width: 100%;"):
+                self.controls["elevationChart"] = ui.echart({
+                    "animation": False,
+                    "legend": {"data": ["elevation [m]"]},
+                    "xAxis": {"type": "category"},
+                    "yAxis": {
+                        "type": "value",
+                        "scale": True,
+                        "axisLabel": {
+                            #":formatter": "function (value) { return Number.isInteger(value) ? value : ''; }"
+                        },
                     },
-                },
-                "series": [
-                    {"name": "elevation [m]", "color": "blue", "type": "line", "data": []}
-                ],
-            }).classes("w-full h-full")
+                    "series": [
+                        {"name": "elevation [m]", "color": "blue", "type": "line", "data": []}
+                    ],
+                }).classes("w-full").style("width: 100%; height: 260px;")
 
         self.updateElevationMessage.subscribe(partial(self.updateElevationCard, self.controls.copy()))
 

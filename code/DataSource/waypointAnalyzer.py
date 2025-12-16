@@ -14,6 +14,8 @@ class WaypointAnalyzer:
 
     def feedPoint(self, data):
 
+        
+
         if(len(self.lastWaypoints) != 0 and data.UTCTime == self.lastWaypoints[-1].UTCTime):
             #logger.warning("new waypoint has got the same time as the last")
             return
@@ -32,8 +34,6 @@ class WaypointAnalyzer:
             speeds.append([dataPoint.SOG, dataPoint.COG])
             alts.append(dataPoint.alt)
 
-        
         self.newElevationDataSignal.trigger(alts)
         
-
 
