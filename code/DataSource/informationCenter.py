@@ -22,7 +22,6 @@ class InformationCenter:
         logger.info("init values at information center")
 
         self.setValue("PARAMS", getJson("./params.json"))
-        self.setValue("car-centered", True)
         self.setValue("last gps update ts", 0)
         self.setValue("recentPositionsList", [])
     

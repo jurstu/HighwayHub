@@ -28,6 +28,7 @@ class UiGen:
         self.state = EmptyClass()
         self.state.lon = 0
         self.state.lat = 0
+        self.state.follow = False
 
         self.ic = InformationCenter()
         #self.loadSettingsFromParams(self.ic.getValue("PARAMS"))
@@ -56,6 +57,8 @@ class UiGen:
                         self.controls["GPS card lat"] = ui.label(" ")
                         self.controls["GPS card lon"] = ui.label(" ")
                         self.controls["GPS card alt"] = ui.label(" ")
+                        self.controls["followSwitch"] = ui.switch('follow', on_change=self.followSwitchChanged, value=self.state.follow)
+
                 with ui.card().classes("h-full px-4 rounded bg-slate-500 flex items-center justify-center") as card:
                     self.controls["BATT card"] = card
                     with ui.column().style("gap: 0.1rem").classes("h-full items-center justify-center"):
@@ -63,6 +66,8 @@ class UiGen:
                         self.controls["BATT card percent"] = ui.label(" ")
                         self.controls["BATT card status"] = ui.label(" ")
                         self.controls["BATT card noneLabel"] = ui.label(" ")
+
+                
 
         self.updatePositionMessage.subscribe(partial(self.updateGpsCard, self.controls.copy()))
         self.updateBatteryMessage.subscribe(partial(self.updateBatteryCard, self.controls.copy()))
@@ -82,6 +87,10 @@ class UiGen:
         self.updatePositionMessage.emit(data)
 
     def updateGpsCard(self, controls, data):
+        controls["followSwitch"].value = self.state.follow
+
+        if data is None:
+            return
         controls["GPS card"].classes(remove="bg-green-500 bg-yellow-500 bg-red-500 bg-slate-500")
         status = data.fix
         if status == 0:
@@ -93,7 +102,10 @@ class UiGen:
             controls[f"GPS card alt"].text = "{: 3.1f}m".format(data.alt)
 
             
-
+    def followSwitchChanged(self, e):
+        logger.info(f"follow switch switched to {e.value}")
+        self.state.follow = e.value
+        self.updatePositionMessage.emit(None)
 
 
 
@@ -126,6 +138,8 @@ class UiGen:
 
         
     def modifyCarMarker(self, controls, data):
+        if data is None:
+            return
         marker = controls["carMarker"]
         m = controls["map"]
         lat = data.lat
@@ -134,7 +148,7 @@ class UiGen:
         marker.move(lat, lon)
         marker.run_method(':setRotationAngle', "{:d}".format(angle))
         marker.run_method(':setIcon', 'L.icon({iconUrl: "/car.png", iconSize: [32, 32], iconAnchor: [16, 16]})')
-        cc = self.ic.getValue("car-centered", False)
+        cc = self.state.follow
         if(cc):
             m.set_center((data.lat, data.lon))
 
