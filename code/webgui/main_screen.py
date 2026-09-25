@@ -188,11 +188,11 @@ class MainScreen:
             position=SAMPLE_PATH[-1], path=SAMPLE_PATH,
             center=(52.2297, 21.0122), zoom=12, speed=84, heading=62,
             plots={
-                'speed': Plot('SPEED HISTORY', 'km/h', '#c7f879', 35, 90,
+                'speed': Plot('SPEED HISTORY', 'km/h', "#e9160f", 35, 90,
                               (43, 46, 45, 51, 54, 53, 61, 65, 62, 69, 75, 73, 78, 77, 82, 84)),
                 'altitude': Plot('ALTITUDE', 'm', '#71c9d4', 90, 120,
                                  (96, 97, 99, 97, 100, 102, 101, 104, 103, 106, 105, 108, 107, 110, 111, 112)),
-                'battery': Plot('BATTERY VOLTAGE', 'V', '#e7b978', 13.5, 14.0,
+                'battery': Plot('BATTERY VOLTAGE', 'V', "#d86011", 13.5, 14.0,
                                 (13.72, 13.75, 13.73, 13.79, 13.77, 13.81, 13.78, 13.83,
                                  13.81, 13.79, 13.84, 13.82, 13.85, 13.82, 13.81, 13.8), 1),
             },
