@@ -1,0 +1,15 @@
+[project]
+name = "HighwayHub"
+version = "0.0.1"
+description = "Highway Hub - software for car data aquisition and display"
+readme = "README.md"
+requires-python = ">=3.12"
+
+dependencies = [
+    "requests>=2.32.5"
+]
+
+[dependency-groups]
+dev = [
+
+]

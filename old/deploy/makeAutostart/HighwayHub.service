@@ -1,0 +1,15 @@
+[Unit]
+Description=HighwayHub starter service
+
+[Service]
+ExecStart=/bin/bash /home/jur/startHighwayHub.sh
+User=jur
+Group=1000
+Type=forking
+
+# optional items below
+#Restart=always
+#RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

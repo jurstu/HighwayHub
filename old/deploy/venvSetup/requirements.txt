@@ -1,0 +1,15 @@
+opencv-python
+nicegui
+flask
+python-can
+colorlog
+pyserial
+pynmea2
+pytz
+timezonefinder
+pyubx2
+requests
+smbus
+pycairo 
+PyGObject==3.50.0
+lzstring
