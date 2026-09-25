@@ -40,6 +40,8 @@ class BatteryMonitor:
         pass
 
     def updateData(self):
+
+        self.state.allGood = 1
         try:
             data = self.bus.read_i2c_block_data(ADDR, 0x02, 0x01)
             if(data[0] & 0x40):
@@ -51,6 +53,7 @@ class BatteryMonitor:
             else:
                 self.state.chargingStatus = "Idle state"
         except:
+            self.state.allGood = 0
             logger.warning("didn't manage to read charging state")
 
 
@@ -60,6 +63,7 @@ class BatteryMonitor:
             self.state.vbusVoltage = int(data[0] | data[1] << 8)
             self.state.vbusCurrent = int(data[2] | data[3] << 8)
         except:
+            self.state.allGood = 0
             logger.warning("didn't manage to read VBUS stats")
 
         try:
@@ -77,6 +81,7 @@ class BatteryMonitor:
             else:
                 self.state.timeToFull = int(data[10] | data[11] << 8)
         except:
+            self.state.allGood = 0
             logger.warning("didn't manage to read battery stats")
 
         try:
@@ -91,6 +96,7 @@ class BatteryMonitor:
             self.state.cellVolts[3-1] = V3
             self.state.cellVolts[4-1] = V4
         except:
+            self.state.allGood = 0
             logger.warning("didn't manage to read cell voltages")
 
 
