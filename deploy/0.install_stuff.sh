@@ -1,6 +1,6 @@
 sudo apt update
 
-sudo apt install -y nload screen vim htop
+sudo apt install -y nload screen vim htop tmux
 
 
 #sudo apt
