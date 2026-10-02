@@ -14,4 +14,4 @@ sudo systemctl disable --now getty@tty1.service
 sudo systemctl daemon-reload
 
 sudo systemctl enable kiosk.service
-sudo systemctl restart kiosk.servicue
+sudo systemctl restart kiosk.service
