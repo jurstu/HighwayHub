@@ -1,79 +1,57 @@
+import re
+
 import cv2
-import numpy as np
 from rapidocr import RapidOCR
 
 class Ocr:
     def __init__(self):
         self.engine = RapidOCR()
 
-    def process(self, img):
-        # 1. Grayscale
-        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    @staticmethod
+    def format_plate(text):
+        """Keep plate characters and restore the space after the region prefix."""
+        plate = re.sub(r"[^A-Z0-9]", "", text.upper())
+        if not 4 <= len(plate) <= 8:
+            return None
 
-        # 2. Upscale — OCR generally benefits from larger characters
-        h, w = gray.shape[:2]
-        width = 640
-        scale = width / w
+        if re.fullmatch(r"[A-Z][0-9][A-Z]{3}", plate):
+            prefix_length = 2  # Temporary plates, e.g. S6 EVA.
+        else:
+            prefix = re.match(r"[A-Z]{1,3}", plate)
+            if prefix is None:
+                return None
+            prefix_length = len(prefix.group())
 
-        gray = cv2.resize(
-            gray,
-            (width, round(h * scale)),
-            interpolation=cv2.INTER_CUBIC
-        )
-        
-        ## 3. Local contrast normalization
-        #clahe = cv2.createCLAHE(
-        #    clipLimit=2.0,
-        #    tileGridSize=(3, 3)
-        #)
-        #gray = clahe.apply(gray)
+        if prefix_length == len(plate):
+            return None
+        return f"{plate[:prefix_length]} {plate[prefix_length:]}"
 
-        # 4. Preserve character edges while reducing noise
-        gray = cv2.bilateralFilter(gray, 7, 50, 50)
-        
-        gray = self.enhance_plate(gray)
-        
-        bin = self.quantize(gray, 7, [2, 3, 4, 5, 6, 7])
-        occr = self.ocr(bin)
-        return bin, occr
+    def _recognize(self, image):
+        # The plate finder has already isolated the plate. RapidOCR's text
+        # detector often misses short or blurred crops, so read the whole crop.
+        result = self.engine(image, use_det=False)
+        if not result.txts:
+            return None, 0.0
+        return self.format_plate(result.txts[0]), float(result.scores[0])
 
-    def enhance_plate(self, img):
-        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) if img.ndim == 3 else img
+    def process(self, img, original=None):
+        """Return the best OCR view and a tuple of recognized plate texts."""
+        source = original if original is not None else img
+        best_image = source
+        best_text, best_score = self._recognize(source)
 
-        # Normalize slow illumination changes
-        bg = cv2.GaussianBlur(gray, (0, 0), sigmaX=15)
-        norm = cv2.divide(gray, bg, scale=180)
+        if best_score < 0.9 or best_text is None:
+            gray = cv2.cvtColor(source, cv2.COLOR_BGR2GRAY) if source.ndim == 3 else source
+            contrast = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(4, 2)).apply(gray)
+            candidates = [contrast]
+            if original is not None and (img.shape != source.shape or not (img == source).all()):
+                candidates.append(img)
 
-        # Local contrast
-        clahe = cv2.createCLAHE(clipLimit=2.5, tileGridSize=(8, 4))
-        norm = clahe.apply(norm)
+            for candidate in candidates:
+                text, score = self._recognize(candidate)
+                if text is not None and (best_text is None or score > best_score):
+                    best_image, best_text, best_score = candidate, text, score
 
-        return norm
-
-    def quantize(self, gray, levels=7, keep=None):
-        x = gray.reshape(-1, 1).astype(np.float32)
-
-        _, labels, centers = cv2.kmeans(
-            x, levels, None,
-            (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 1),
-            5, cv2.KMEANS_PP_CENTERS
-        )
-
-        # Reorder labels: 0=darkest, levels-1=brightest
-        order = np.argsort(centers.flatten())
-        remap = np.zeros(levels, dtype=np.uint8)
-        remap[order] = np.arange(levels)
-        buckets = remap[labels.flatten()].reshape(gray.shape)
-
-        if keep is None:
-            keep = range(levels)
-
-        # Selected buckets -> white, everything else -> black
-        out = np.isin(buckets, keep).astype(np.uint8) * 255
-
-        return out
-
-
-    def ocr(self, image):
-        result = self.engine(image)
-        return result.txts
+        if best_image.ndim == 2:
+            best_image = cv2.cvtColor(best_image, cv2.COLOR_GRAY2BGR)
+        return best_image, (best_text,) if best_text is not None and best_score >= 0.5 else None
