@@ -220,13 +220,31 @@ def _chart(plot: Plot) -> dict:
     return {
         'animation': False,
         'grid': {'left': 64, 'right': 6, 'top': 8, 'bottom': 21},
+        'tooltip': {
+            'trigger': 'item',
+            'confine': True,
+            'backgroundColor': '#10191eee',
+            'borderColor': plot.color,
+            'borderWidth': 1,
+            'textStyle': {'color': '#f2f6ee', 'fontSize': 12, 'fontWeight': 700},
+            ':formatter': (
+                f"params => Number(params.value[1]).toFixed({plot.decimals}) + "
+                f"' {plot.unit}'"
+            ),
+        },
         'xAxis': {'type': 'time', 'boundaryGap': False, 'show': False},
         'yAxis': {'type': 'value', 'min': plot.minimum, 'max': plot.maximum,
                   'axisLabel': {'show': False}, 'axisTick': {'show': False},
                   'axisLine': {'show': False},
                   'splitLine': {'lineStyle': {'color': '#34454a', 'type': 'dashed'}}},
         'series': [{'type': 'line', 'data': [list(sample) for sample in plot.values],
-                    'smooth': 0.35, 'showSymbol': False,
+                    'smooth': 0.35, 'showSymbol': True, 'symbol': 'circle', 'symbolSize': 10,
+                    'itemStyle': {'color': 'transparent', 'borderColor': 'transparent'},
+                    'emphasis': {
+                        'scale': False,
+                        'itemStyle': {'color': plot.color, 'borderColor': '#f2f6ee',
+                                      'borderWidth': 2, 'opacity': 1},
+                    },
                     'lineStyle': {'width': 2.5, 'color': plot.color},
                     'areaStyle': {'color': {
                         'type': 'linear', 'x': 0, 'y': 0, 'x2': 0, 'y2': 1,
@@ -490,7 +508,7 @@ class MainScreen:
                                  'doubleClickZoom': True,
                                  'zoomAnimation': False, 'fadeAnimation': False}).classes('map-canvas')
                     route = map_view.generic_layer(name='polyline', args=[list(initial.path),
-                        {'color': '#c7f879', 'weight': 5, 'opacity': 0.9}])
+                        {'color': '#C82020', 'weight': 5, 'opacity': 0.9}])
                     for measurement in _distance_measurements():
                         map_view.generic_layer(name='polyline', args=[
                             [measurement.start, measurement.end],
