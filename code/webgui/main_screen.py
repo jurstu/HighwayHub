@@ -1,7 +1,10 @@
 """Standalone HighwayHub dashboard; WebguiRoot uses MainScreen.spawn_gui."""
 
 from dataclasses import dataclass, replace
+from functools import lru_cache
+import json
 from math import isfinite
+from pathlib import Path
 from threading import RLock
 from time import time
 from typing import Any, Iterable
@@ -115,9 +118,10 @@ body { background: #080d11; color: #f2f6ee; font-family: Inter, system-ui, sans-
 
 Point = tuple[float, float]
 TimedValue = tuple[int, float]
-MAX_HISTORY = 120
+MAX_HISTORY = 300
 DEFAULT_MAP_CENTER: Point = (52.0693, 19.4803)
 DEFAULT_MAP_ZOOM = 6
+CANARD_DATA_PATH = Path(__file__).resolve().parents[2] / 'old' / 'code' / 'assets' / 'canard_detailed_data.json'
 
 
 @dataclass(frozen=True)
@@ -145,11 +149,71 @@ class ScreenState:
     view_revision: int = 0
 
 
+@dataclass(frozen=True)
+class DistanceMeasurement:
+    start: Point
+    end: Point
+    passenger_limit: str
+    truck_limit: str
+    start_direction: str
+    end_direction: str
+
+
 def _point(lat: float, lon: float) -> Point:
     lat, lon = float(lat), float(lon)
     if not (isfinite(lat) and isfinite(lon) and -90 <= lat <= 90 and -180 <= lon <= 180):
         raise ValueError('invalid latitude or longitude')
     return lat, lon
+
+
+@lru_cache(maxsize=1)
+def _distance_measurements() -> tuple[DistanceMeasurement, ...]:
+    """Load valid sectional speed measurement points from the legacy CANARD data."""
+    try:
+        records = json.loads(CANARD_DATA_PATH.read_text(encoding='utf-8'))
+    except (OSError, json.JSONDecodeError):
+        return ()
+
+    measurements: list[DistanceMeasurement] = []
+    for record in records.values():
+        device = record.get('urzadzenie') or {}
+        endpoint = device.get('lokalizacjaDrugiegoPunktu')
+        if device.get('rodzajPomiaru') != 'PO' or not endpoint:
+            continue
+        try:
+            end_lon, end_lat = (float(value) for value in endpoint.split(';'))
+            start = _point(record['lat'], record['lon'])
+            end = _point(end_lat, end_lon)
+        except (KeyError, TypeError, ValueError):
+            continue
+
+        limits = record.get('limity') or [{}]
+        passenger_limits = {str(limit['limitOsobowe']) for limit in limits if limit.get('limitOsobowe')}
+        truck_limits = {str(limit['limitCiezarowe']) for limit in limits if limit.get('limitCiezarowe')}
+        measurements.append(DistanceMeasurement(
+            start=start,
+            end=end,
+            passenger_limit='/'.join(sorted(passenger_limits, key=int)) or '—',
+            truck_limit='/'.join(sorted(truck_limits, key=int)) or '—',
+            start_direction=device.get('nazwaKierunku1') or 'start section',
+            end_direction=device.get('nazwaKierunku2') or 'end section',
+        ))
+    return tuple(measurements)
+
+
+def _speed_limit_icon(limit: str) -> str:
+    """Return a Leaflet div icon resembling a European speed-limit sign."""
+    return (
+        "L.divIcon({className: '', iconSize: [30, 30], iconAnchor: [15, 15], "
+        "html: '<div style=\"box-sizing:border-box;width:30px;height:30px;border:4px solid #d93232;"
+        "border-radius:50%;background:#fff;color:#111;display:flex;align-items:center;justify-content:center;"
+        f"font:800 11px/1 Arial,sans-serif;box-shadow:0 1px 5px #0009\">{limit}</div>'}})"
+    )
+
+
+def _measurement_tooltip(measurement: DistanceMeasurement, direction: str) -> str:
+    return (f'Distance measurement · {direction}<br>'
+            f'Cars: {measurement.passenger_limit} km/h · Trucks: {measurement.truck_limit} km/h')
 
 
 def _chart(plot: Plot) -> dict:
@@ -237,7 +301,13 @@ class MainScreen:
             self._state = replace(self._state, plots=plots)
 
     def set_position(self, lat: float, lon: float) -> None:
-        self._set(position=_point(lat, lon))
+        point = _point(lat, lon)
+        with self._lock:
+            current = self._state
+            changes: dict[str, Any] = {'position': point}
+            if current.follow:
+                changes.update(center=point, view_revision=current.view_revision + 1)
+            self._state = replace(current, **changes)
 
     def set_path(self, points: Iterable[Point]) -> None:
         self._set(path=tuple(_point(*point) for point in points))
@@ -421,6 +491,26 @@ class MainScreen:
                                  'zoomAnimation': False, 'fadeAnimation': False}).classes('map-canvas')
                     route = map_view.generic_layer(name='polyline', args=[list(initial.path),
                         {'color': '#c7f879', 'weight': 5, 'opacity': 0.9}])
+                    for measurement in _distance_measurements():
+                        map_view.generic_layer(name='polyline', args=[
+                            [measurement.start, measurement.end],
+                            {'color': '#55a9df', 'weight': 3, 'opacity': 0.65,
+                             'dashArray': '7 7', 'interactive': False},
+                        ])
+                        for point, direction in (
+                            (measurement.start, measurement.start_direction),
+                            (measurement.end, measurement.end_direction),
+                        ):
+                            limit_marker = map_view.marker(
+                                latlng=point,
+                                options={'keyboard': False, 'riseOnHover': True},
+                            )
+                            limit_marker.run_method(':setIcon', _speed_limit_icon(measurement.passenger_limit))
+                            limit_marker.run_method(
+                                'bindTooltip',
+                                _measurement_tooltip(measurement, direction),
+                                {'direction': 'top', 'offset': [0, -14]},
+                            )
                     marker = map_view.marker(latlng=initial.position or initial.center,
                                              options={'opacity': 1 if initial.position else 0})
                     marker.run_method(':setIcon', _arrow_icon(initial_heading))
@@ -461,21 +551,39 @@ class MainScreen:
 
             previous = initial
 
-            def map_view_changed(event: Any) -> None:
-                """Stop following when the resulting map view differs from the tracked view."""
+            user_is_dragging = False
+
+            def stop_following() -> None:
+                """Stop following only in response to direct map input from the user."""
                 with self._lock:
                     current = self._state
-                    if not current.follow:
-                        return
-                    center = event.args.get('center', map_view.center)
-                    zoom = int(event.args.get('zoom', map_view.zoom))
-                    latitude_delta = abs(float(center[0]) - current.center[0])
-                    longitude_delta = abs(float(center[1]) - current.center[1])
-                    if latitude_delta > 1e-7 or longitude_delta > 1e-7 or zoom != current.zoom:
+                    if current.follow:
                         self._state = replace(current, follow=False)
 
-            map_view.on('map-moveend', map_view_changed)
-            map_view.on('map-zoomend', map_view_changed)
+            def begin_user_drag() -> None:
+                nonlocal user_is_dragging
+                user_is_dragging = True
+
+            def end_user_drag() -> None:
+                nonlocal user_is_dragging
+                user_is_dragging = False
+
+            def map_movement_started() -> None:
+                if user_is_dragging:
+                    stop_following()
+
+            # moveend/zoomend also fire after our setView calls, so they cannot be
+            # used to infer user intent. A drag only disables follow once it starts
+            # moving; wheel, double-click and keyboard events directly imply map
+            # navigation and are never emitted by programmatic GPS recentering.
+            map_view.on('map-mousedown', begin_user_drag, [])
+            map_view.on('map-mouseup', end_user_drag, [])
+            map_view.on('touchstart', begin_user_drag, [])
+            map_view.on('touchend', end_user_drag, [])
+            map_view.on('map-movestart', map_movement_started, [])
+            map_view.on('map-dblclick', stop_following, [])
+            map_view.on('map-keydown', stop_following, [])
+            map_view.on('wheel', stop_following, [])
 
             def refresh() -> None:
                 nonlocal previous

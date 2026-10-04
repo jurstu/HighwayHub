@@ -20,7 +20,6 @@ class mainClass:
         self.webgui.run()
 
     def new_gps(self, parser):
-        logger.info(f"new gps: {parser}")
         self.webgui.main_screen.update_gps_status(parser.status)
 
 

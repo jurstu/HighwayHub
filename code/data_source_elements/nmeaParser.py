@@ -131,9 +131,10 @@ class NmeaParser:
             self.status.lon = lon
             self.newPositionSignal.trigger(self.status)
 
+        logger.warning(message)
         NAVGood = message.nav_status == "V"  # V-alid
-        self.status.NAVGood = NAVGood
-        if NAVGood:
+        self.status.NAVGood = NAVGood or True
+        if NAVGood or True:
             self.status.SOG = message.spd_over_grnd * 1.852  # knots per hour  ----> km per hour
             self.status.COG = message.true_course if message.true_course is not None else 0
 
