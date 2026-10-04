@@ -1,10 +1,5 @@
-"""Run HighwayHub with a live, circular GPS demo."""
-
-from collections import deque
-from math import cos, pi, sin
 import time
 from Util import printMotd
-
 from webgui import WebguiRoot
 from data_source_elements import GpsHandler
 
@@ -24,17 +19,9 @@ class mainClass:
         self.webgui = WebguiRoot()
         self.webgui.run()
 
-    def new_gps(self, position):
-        logger.info(f"new gps: {position}")
-        if(position.status.fix != 0):
-            lat = position.status.lat
-            lon = position.status.lon
-            st = position.status
-            self.webgui.main_screen.set_center(lat, lon)
-            self.webgui.main_screen.set_position(lat, lon)
-            self.webgui.main_screen.set_speed(st.SOG)
-            self.webgui.main_screen.set_heading(st.COG)
-            #self.webgui.main_screen.set
+    def new_gps(self, parser):
+        logger.info(f"new gps: {parser}")
+        self.webgui.main_screen.update_gps_status(parser.status)
 
 
 

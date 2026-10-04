@@ -3,6 +3,7 @@
 from dataclasses import dataclass, replace
 from math import isfinite
 from threading import RLock
+from time import time
 from typing import Any, Iterable
 
 from nicegui import ui
@@ -71,17 +72,30 @@ body { background: #080d11; color: #f2f6ee; font-family: Inter, system-ui, sans-
 .heading-value { color: #c7f879; font-size: 13px; }
 .map-shell { grid-area: map; position: relative; background: #d8dedb; }
 .map-canvas { position: absolute !important; inset: 0; width: 100% !important; height: 100% !important; }
-.map-top, .map-bottom { position: absolute; z-index: 2; left: 19px; right: 19px; display: flex;
+.map-top, .map-bottom { position: absolute; z-index: 1100; left: 19px; right: 19px; display: flex;
   justify-content: space-between; pointer-events: none; }
 .map-top { top: 19px; align-items: flex-start; } .map-bottom { bottom: 24px; align-items: flex-end; }
 .map-title, .map-readout, .map-compass { border: 1px solid #46605c9e; border-radius: 10px;
   background: #101a1ee8; backdrop-filter: blur(10px); }
+.map-actions { display: flex; align-items: center; gap: 8px; pointer-events: auto; }
+.follow-button { min-height: 35px !important; padding: 0 13px !important; border: 1px solid #46605c;
+  border-radius: 10px !important; background: #101a1ee8 !important; color: #a7b6b8 !important;
+  font-size: 10px !important; font-weight: 850 !important; letter-spacing: .12em; backdrop-filter: blur(10px); }
+.follow-button.following { border-color: #8fbd59; background: #182719ed !important; color: #c7f879 !important; }
 .map-title, .map-readout { padding: 9px 12px; }
 .map-title .eyebrow { color: #c7f879; }
 .map-place { margin-top: 4px; font-size: 20px; font-weight: 750; }
 .map-compass { width: 35px; height: 35px; display: grid; place-items: center; color: #c7f879; font-weight: 900; }
 .map-readout-label { color: #849d9e; font-size: 9px; font-weight: 800; letter-spacing: .16em; }
 .map-readout-value { margin-top: 3px; font-size: 12px; font-weight: 750; }
+.gps-grid { flex: 1; display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); align-content: center;
+  gap: 9px 16px; margin-top: 10px; }
+.gps-item { min-width: 0; }
+.gps-label { color: #71868a; font-size: 8px; font-weight: 800; letter-spacing: .13em; }
+.gps-value { color: #dce8e5; font-size: 12px; font-weight: 750; overflow: hidden; text-overflow: ellipsis; }
+.gps-fix { color: #c7f879; }
+.vehicle-arrow { color: #17252a; font-size: 30px; line-height: 30px; font-weight: 900;
+  filter: drop-shadow(0 1px 1px #fff) drop-shadow(0 0 5px #c7f879); transform-origin: center; }
 .statusbar { flex: 0 0 18px; display: flex; justify-content: space-between; gap: 8px;
   color: #71868a; font-size: 9px; font-weight: 750; letter-spacing: .14em; }
 @media (orientation: portrait) {
@@ -100,10 +114,10 @@ body { background: #080d11; color: #f2f6ee; font-family: Inter, system-ui, sans-
 """
 
 Point = tuple[float, float]
-SAMPLE_PATH: tuple[Point, ...] = (
-    (52.2198, 20.9845), (52.2237, 20.9934), (52.2281, 21.0000),
-    (52.2305, 21.0075), (52.2329, 21.0154), (52.2371, 21.0250),
-)
+TimedValue = tuple[int, float]
+MAX_HISTORY = 120
+DEFAULT_MAP_CENTER: Point = (52.0693, 19.4803)
+DEFAULT_MAP_ZOOM = 6
 
 
 @dataclass(frozen=True)
@@ -113,19 +127,21 @@ class Plot:
     color: str
     minimum: float
     maximum: float
-    values: tuple[float, ...]
+    values: tuple[TimedValue, ...]
     decimals: int = 0
 
 
 @dataclass(frozen=True)
 class ScreenState:
-    position: Point
+    position: Point | None
     path: tuple[Point, ...]
     center: Point
     zoom: int
-    speed: float
-    heading: float
+    speed: float | None
+    heading: float | None
     plots: dict[str, Plot]
+    gps: dict[str, str]
+    follow: bool = True
     view_revision: int = 0
 
 
@@ -140,13 +156,13 @@ def _chart(plot: Plot) -> dict:
     return {
         'animation': False,
         'grid': {'left': 64, 'right': 6, 'top': 8, 'bottom': 21},
-        'xAxis': {'type': 'category', 'boundaryGap': False,
-                  'data': list(range(len(plot.values))), 'show': False},
+        'xAxis': {'type': 'time', 'boundaryGap': False, 'show': False},
         'yAxis': {'type': 'value', 'min': plot.minimum, 'max': plot.maximum,
                   'axisLabel': {'show': False}, 'axisTick': {'show': False},
                   'axisLine': {'show': False},
                   'splitLine': {'lineStyle': {'color': '#34454a', 'type': 'dashed'}}},
-        'series': [{'type': 'line', 'data': plot.values, 'smooth': 0.35, 'showSymbol': False,
+        'series': [{'type': 'line', 'data': [list(sample) for sample in plot.values],
+                    'smooth': 0.35, 'showSymbol': False,
                     'lineStyle': {'width': 2.5, 'color': plot.color},
                     'areaStyle': {'color': {
                         'type': 'linear', 'x': 0, 'y': 0, 'x2': 0, 'y2': 1,
@@ -158,43 +174,52 @@ def _chart(plot: Plot) -> dict:
 
 
 def _metric(plot: Plot) -> str:
-    return f'{plot.values[-1]:.{plot.decimals}f}' if plot.values else '—'
+    return f'{plot.values[-1][1]:.{plot.decimals}f}' if plot.values else '—'
 
 
 def _range_label(label: str, value: float, plot: Plot) -> str:
     return f'{label} {value:.{plot.decimals}f}'
 
 
-def _position_text(point: Point) -> str:
+def _position_text(point: Point | None) -> str:
+    if point is None:
+        return 'WAITING FOR GPS FIX'
     lat, lon = point
     return f'{abs(lat):.5f}° {"N" if lat >= 0 else "S"} / {abs(lon):.5f}° {"E" if lon >= 0 else "W"}'
 
 
-def _heading_text(degrees: float) -> str:
+def _heading_text(degrees: float | None) -> str:
+    if degrees is None:
+        return '—'
     direction = ('N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW')[int((degrees + 22.5) // 45) % 8]
     return f'{degrees:03.0f}°  {direction}'
+
+
+def _arrow_icon(heading: float) -> str:
+    return ("L.divIcon({className: '', iconSize: [30, 30], iconAnchor: [15, 15], "
+            f"html: '<div class=\"vehicle-arrow\" style=\"transform:rotate({heading:.1f}deg)\">↑</div>'}})")
 
 
 class MainScreen:
     """A standalone dashboard; setters update every open browser page.
 
-    Plot names: "speed", "altitude", "battery".
+    GPS samples are timestamped here when received so charts preserve their
+    real spacing without exposing timestamps in the dashboard.
     """
 
     def __init__(self, port: int = 8080) -> None:
         self.port = port
         self._lock = RLock()
         self._state = ScreenState(
-            position=SAMPLE_PATH[-1], path=SAMPLE_PATH,
-            center=(52.2297, 21.0122), zoom=12, speed=84, heading=62,
+            position=None, path=(), center=DEFAULT_MAP_CENTER, zoom=DEFAULT_MAP_ZOOM,
+            speed=None, heading=None,
             plots={
-                'speed': Plot('SPEED HISTORY', 'km/h', "#e9160f", 35, 90,
-                              (43, 46, 45, 51, 54, 53, 61, 65, 62, 69, 75, 73, 78, 77, 82, 84)),
-                'altitude': Plot('ALTITUDE', 'm', '#71c9d4', 90, 120,
-                                 (96, 97, 99, 97, 100, 102, 101, 104, 103, 106, 105, 108, 107, 110, 111, 112)),
-                'battery': Plot('BATTERY VOLTAGE', 'V', "#d86011", 13.5, 14.0,
-                                (13.72, 13.75, 13.73, 13.79, 13.77, 13.81, 13.78, 13.83,
-                                 13.81, 13.79, 13.84, 13.82, 13.85, 13.82, 13.81, 13.8), 1),
+                'speed': Plot('SPEED HISTORY', 'km/h', '#e9160f', 0, 10, ()),
+                'altitude': Plot('ALTITUDE', 'm', '#71c9d4', 0, 10, (), 1),
+            },
+            gps={
+                'protocol': '—', 'fix': 'NO FIX', 'satellites': '—', 'hdop': '—',
+                'rmc': '—', 'nav': '—', 'utc': '—',
             },
         )
 
@@ -230,6 +255,16 @@ class MainScreen:
         with self._lock:
             self._state = replace(self._state, zoom=zoom, view_revision=self._state.view_revision + 1)
 
+    def set_follow(self, enabled: bool) -> None:
+        """Enable or disable keeping the map centered on the latest GPS fix."""
+        with self._lock:
+            current = self._state
+            changes: dict[str, Any] = {'follow': bool(enabled)}
+            if enabled and current.position is not None:
+                changes.update(center=current.position,
+                               view_revision=current.view_revision + 1)
+            self._state = replace(current, **changes)
+
     def set_speed(self, km_per_hour: float) -> None:
         speed = float(km_per_hour)
         if not isfinite(speed) or speed < 0:
@@ -257,10 +292,71 @@ class MainScreen:
         self._set_plot(name, minimum=lower, maximum=upper)
 
     def set_plot_values(self, name: str, values: Iterable[float]) -> None:
-        samples = tuple(float(value) for value in values)
-        if not all(isfinite(value) for value in samples):
+        now = int(time() * 1000)
+        samples = tuple((now + index, float(value)) for index, value in enumerate(values))
+        if not all(isfinite(value) for _, value in samples):
             raise ValueError('plot values must be finite')
         self._set_plot(name, values=samples)
+
+    @staticmethod
+    def _display(value: Any, decimals: int | None = None) -> str:
+        if value is None or value == '':
+            return '—'
+        if decimals is not None:
+            try:
+                number = float(value)
+                return f'{number:.{decimals}f}' if isfinite(number) else '—'
+            except (TypeError, ValueError):
+                return '—'
+        return str(value)
+
+    def update_gps_status(self, status: Any) -> None:
+        """Accept the complete ``NmeaParser.status`` object and update GPS UI state."""
+        received_at = int(time() * 1000)
+        fix = int(getattr(status, 'fix', 0) or 0)
+        gps = {
+            'protocol': self._display(getattr(status, 'protocol', None)),
+            'fix': f'FIX {fix}' if fix else 'NO FIX',
+            'satellites': self._display(getattr(status, 'numSats', None)),
+            'hdop': self._display(getattr(status, 'horizontalDil', None), 1),
+            'rmc': 'VALID' if bool(getattr(status, 'RMCGood', False)) else 'INVALID',
+            'nav': 'VALID' if bool(getattr(status, 'NAVGood', False)) else 'INVALID',
+            'utc': self._display(getattr(status, 'UTCTime', None)),
+        }
+
+        with self._lock:
+            current = self._state
+            if current.plots['speed'].values:
+                received_at = max(received_at, current.plots['speed'].values[-1][0] + 1)
+            changes: dict[str, Any] = {'gps': gps}
+            if fix:
+                try:
+                    point = _point(getattr(status, 'lat'), getattr(status, 'lon'))
+                    speed = max(0.0, float(getattr(status, 'SOG', 0) or 0))
+                    heading = float(getattr(status, 'COG', 0) or 0) % 360
+                    altitude = float(getattr(status, 'alt', 0) or 0)
+                    if not all(isfinite(value) for value in (speed, heading, altitude)):
+                        raise ValueError('non-finite GPS telemetry')
+                except (AttributeError, TypeError, ValueError):
+                    self._state = replace(current, gps=gps)
+                    return
+
+                path = (*current.path, point)[-MAX_HISTORY:]
+                plots = current.plots.copy()
+                for name, value in (('speed', speed), ('altitude', altitude)):
+                    plot = plots[name]
+                    values = (*plot.values, (received_at, value))[-MAX_HISTORY:]
+                    data_values = [sample[1] for sample in values]
+                    lower, upper = min(data_values), max(data_values)
+                    padding = max((upper - lower) * 0.15, 5.0 if name == 'speed' else 1.0)
+                    plots[name] = replace(plot, values=values,
+                                          minimum=lower - padding, maximum=upper + padding)
+                changes.update(position=point, path=path, speed=speed,
+                               heading=heading, plots=plots)
+                if current.follow:
+                    changes.update(center=point, zoom=16,
+                                   view_revision=current.view_revision + 1)
+            self._state = replace(current, **changes)
 
     def spawn_gui(self) -> None:
         """Build a page; also works as WebguiRoot's subpage callback."""
@@ -282,7 +378,7 @@ class MainScreen:
                     maximum = ui.label(_range_label('MAX', plot.maximum, plot)).classes('range-label range-max')
                     minimum = ui.label(_range_label('MIN', plot.minimum, plot)).classes('range-label range-min')
                 with ui.element('div').classes('card-foot'):
-                    ui.label('RECENT SAMPLES')
+                    #ui.label('RECENT SAMPLES')
                     ui.label(name.upper())
             return title, value, unit, chart, minimum, maximum
 
@@ -294,9 +390,9 @@ class MainScreen:
                         ui.html('HIGHWAY<span>HUB</span>', sanitize=False).classes('brand-name')
                         ui.label('DRIVER DISPLAY').classes('brand-sub')
                 ui.label('DRIVE OVERVIEW').classes('topbar-center')
-                with ui.element('div').classes('preview-pill'):
-                    ui.element('span').classes('preview-dot')
-                    ui.label('SAMPLE DATA / INPUT READY')
+                #with ui.element('div').classes('preview-pill'):
+                #    ui.element('span').classes('preview-dot')
+                #    ui.label('GPS TELEMETRY')
 
             with ui.element('div').classes('dashboard-grid'):
                 with ui.element('section').classes('card card-compass'):
@@ -307,9 +403,11 @@ class MainScreen:
                         with ui.element('div').classes('dial'):
                             for direction in 'NESW':
                                 ui.label(direction).classes(f'dial-direction dial-{direction.lower()}')
-                            needle = ui.element('div').classes('needle').style(f'transform: rotate({initial.heading}deg)')
+                            initial_heading = initial.heading or 0.0
+                            needle = ui.element('div').classes('needle').style(
+                                f'transform: rotate({initial_heading}deg)')
                             with ui.element('div').classes('dial-center'):
-                                speed = ui.label(f'{initial.speed:.0f}').classes('dial-speed')
+                                speed = ui.label(f'{initial.speed:.0f}' if initial.speed is not None else '—').classes('dial-speed')
                                 ui.label('KM/H').classes('dial-unit')
                     with ui.element('div').classes('heading-readout'):
                         ui.label('CURRENT HEADING')
@@ -318,22 +416,44 @@ class MainScreen:
                 plots = {'speed': plot_card('speed', 2)}
                 with ui.element('section').classes('map-shell'):
                     map_view = ui.leaflet(center=initial.center, zoom=initial.zoom,
-                        options={'zoomControl': False, 'scrollWheelZoom': False,
+                        options={'zoomControl': False, 'scrollWheelZoom': True, 'touchZoom': True,
+                                 'doubleClickZoom': True,
                                  'zoomAnimation': False, 'fadeAnimation': False}).classes('map-canvas')
                     route = map_view.generic_layer(name='polyline', args=[list(initial.path),
                         {'color': '#c7f879', 'weight': 5, 'opacity': 0.9}])
-                    marker = map_view.marker(latlng=initial.position)
+                    marker = map_view.marker(latlng=initial.position or initial.center,
+                                             options={'opacity': 1 if initial.position else 0})
+                    marker.run_method(':setIcon', _arrow_icon(initial_heading))
                     with ui.element('div').classes('map-top'):
                         with ui.element('div').classes('map-title'):
                             ui.label('MAP OVERVIEW').classes('eyebrow')
                             ui.label('OpenStreetMap').classes('map-place')
-                        ui.label('N ↑').classes('map-compass')
+                        with ui.element('div').classes('map-actions'):
+                            follow = ui.button('FOLLOW', icon='my_location',
+                                               on_click=lambda: self.set_follow(True)).props('flat no-caps')
+                            follow.classes('follow-button following' if initial.follow else 'follow-button')
+                            ui.label('N ↑').classes('map-compass')
                     with ui.element('div').classes('map-bottom'):
                         with ui.element('div').classes('map-readout'):
                             ui.label('CURRENT POSITION').classes('map-readout-label')
                             position = ui.label(_position_text(initial.position)).classes('map-readout-value')
                 plots['altitude'] = plot_card('altitude', 3)
-                plots['battery'] = plot_card('battery', 4)
+                with ui.element('section').classes('card card-battery'):
+                    with ui.element('div').classes('card-head'):
+                        ui.label('GPS STATUS').classes('eyebrow')
+                        ui.label('04 / 04').classes('card-index')
+                    gps_labels: dict[str, Any] = {}
+                    gps_fields = (
+                        ('protocol', 'PROTOCOL'), ('fix', 'FIX QUALITY'),
+                        ('satellites', 'SATELLITES'), ('hdop', 'HDOP'),
+                        ('rmc', 'RMC'), ('nav', 'NAVIGATION'), ('utc', 'GPS UTC'),
+                    )
+                    with ui.element('div').classes('gps-grid'):
+                        for key, label in gps_fields:
+                            with ui.element('div').classes('gps-item'):
+                                ui.label(label).classes('gps-label')
+                                classes = 'gps-value gps-fix' if key == 'fix' else 'gps-value'
+                                gps_labels[key] = ui.label(initial.gps[key]).classes(classes)
 
             with ui.element('footer').classes('statusbar'):
                 ui.label('HIGHWAYHUB / DRIVER DISPLAY')
@@ -341,17 +461,33 @@ class MainScreen:
 
             previous = initial
 
+            def map_view_changed(event: Any) -> None:
+                """Stop following when the resulting map view differs from the tracked view."""
+                with self._lock:
+                    current = self._state
+                    if not current.follow:
+                        return
+                    center = event.args.get('center', map_view.center)
+                    zoom = int(event.args.get('zoom', map_view.zoom))
+                    latitude_delta = abs(float(center[0]) - current.center[0])
+                    longitude_delta = abs(float(center[1]) - current.center[1])
+                    if latitude_delta > 1e-7 or longitude_delta > 1e-7 or zoom != current.zoom:
+                        self._state = replace(current, follow=False)
+
+            map_view.on('map-moveend', map_view_changed)
+            map_view.on('map-zoomend', map_view_changed)
+
             def refresh() -> None:
                 nonlocal previous
                 current = self._state
                 if current == previous or not map_view.is_initialized:
                     return
                 if current.view_revision != previous.view_revision:
-                    map_view.set_center(current.center)
-                    map_view.set_zoom(current.zoom)
-                    map_view.update()
+                    map_view.run_map_method('setView', current.center, current.zoom)
                 if current.position != previous.position:
-                    marker.move(*current.position)
+                    if current.position is not None:
+                        marker.move(*current.position)
+                        marker.run_method('setOpacity', 1)
                     position.set_text(_position_text(current.position))
                 if current.path != previous.path:
                     route.run_method('setLatLngs', list(current.path))
@@ -359,7 +495,17 @@ class MainScreen:
                     speed.set_text(f'{current.speed:.0f}')
                 if current.heading != previous.heading:
                     heading.set_text(_heading_text(current.heading))
-                    needle.style(f'transform: rotate({current.heading}deg)')
+                    displayed_heading = current.heading or 0.0
+                    needle.style(f'transform: rotate({displayed_heading}deg)')
+                    marker.run_method(':setIcon', _arrow_icon(displayed_heading))
+                if current.gps != previous.gps:
+                    for key, label in gps_labels.items():
+                        label.set_text(current.gps[key])
+                if current.follow != previous.follow:
+                    if current.follow:
+                        follow.classes(add='following')
+                    else:
+                        follow.classes(remove='following')
                 for name, plot in current.plots.items():
                     if plot == previous.plots[name]:
                         continue
