@@ -2,16 +2,17 @@ import time
 from threading import Thread
 import serial
 from logging_setup import get_logger
+from Util import Signal
 
 logger = get_logger(__name__)
 
 
 class SerialGuard:
-    def __init__(self, dataReceiveCallbacks, portName="/dev/ttyUSB0", portBaud=115200, raw=False):
-        self.raw = raw
+    def __init__(self, portName="/dev/ttyUSB0", portBaud=115200):
         self.portName = portName
         self.portBaud = portBaud
-        self.receiveCallbacks = dataReceiveCallbacks
+        self.new_raw_data_callback_signal = Signal("new RAW data at Serial Guard")
+        self.new_data_callback_signal = Signal("new data at Serial Guard")
         self.end = False
         self.start()
 
@@ -42,18 +43,17 @@ class SerialGuard:
                 if len(data) <= 0:
                     continue
 
-                if self.raw == False:
+                if(len(self.new_data_callback_signal.receivers) > 0):
                     try:
                         strdata = data.decode("utf-8")
-                        for cb in self.receiveCallbacks:
-                            cb(strdata)
+                        self.new_data_callback_signal.trigger(strdata)
                         time.sleep(0.01)
                     except Exception as e:
                         logger.warning("probably utf- conversion error: " + str(e))
                         logger.warning("data was: " + str(data))
-                else:
-                    for cb in self.receiveCallbacks:
-                        cb(data)
+
+                self.new_raw_data_callback_signal.trigger(data)
+
                 time.sleep(0.1)
             self.serial.close()
 

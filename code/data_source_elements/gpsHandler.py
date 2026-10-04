@@ -15,7 +15,8 @@ class GpsHandler:
         self.nmeaParser = NmeaParser()
         self.nmeaParser.newPositionSignal.addReceiver(self.newPositionAvailable)
         self.newPositionSignal = Signal("new position signal")
-        self.sg = SerialGuard([self.nmeaParser.newMsg], "/dev/ttyUSB0", 9600) # TODO maybe do a udev for port path and some autobauding, idk
+        self.sg = SerialGuard("/dev/ttyUSB0", 9600) # TODO maybe do a udev for port path and some autobauding, idk
+        self.sg.new_data_callback_signal.addReceiver(self.nmeaParser.newMsg)
 
     def newPositionAvailable(self, data):
         self.newPositionSignal.trigger(self.nmeaParser)
