@@ -7,6 +7,7 @@ class LpFinder:
         self.model_path = hf_hub_download(
             repo_id="morsetechlab/yolov11-license-plate-detection",
             filename="license-plate-finetune-v1n.pt",
+            revision="251a30d7daedca065f56e04b0af04052c907c68f",
         )
 
         # Load with Ultralytics

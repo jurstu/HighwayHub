@@ -1,0 +1,5 @@
+numpy>=1.26
+opencv-python>=4.8
+ultralytics>=8.4
+rapidocr>=3.9
+huggingface_hub>=1.0
