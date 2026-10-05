@@ -150,6 +150,16 @@ class ALPR:
 
     def predict(self, image: np.ndarray) -> str | None:
         """Return a formatted plate number, or None when no plate can be read."""
+        plate, _ = self.predict_with_box(image)
+        return plate
+
+    def predict_with_box(
+        self, image: np.ndarray
+    ) -> tuple[str | None, tuple[int, int, int, int] | None]:
+        """Return the plate text and its (x1, y1, x2, y2) image coordinates.
+
+        If detection succeeds but OCR does not, return (None, strongest box).
+        """
         if not isinstance(image, np.ndarray):
             raise TypeError("image must be a NumPy array")
         if image.dtype != np.uint8 or image.ndim not in (2, 3) or image.size == 0:
@@ -172,9 +182,10 @@ class ALPR:
             verbose=False,
         )
         if not results:
-            return None
+            return None, None
 
-        best_text, best_score = None, -1.0
+        best_text, best_box, best_score = None, None, -1.0
+        fallback_box, fallback_score = None, -1.0
         height, width = image.shape[:2]
         for box in results[0].boxes:
             x1, y1, x2, y2 = (int(value) for value in box.xyxy[0])
@@ -183,12 +194,17 @@ class ALPR:
             if x1 >= x2 or y1 >= y2:
                 continue
 
+            coordinates = (x1, y1, x2, y2)
+            detection_score = float(box.conf[0])
+            if detection_score > fallback_score:
+                fallback_box, fallback_score = coordinates, detection_score
+
             text, ocr_score = self._read_crop(image[y1:y2, x1:x2])
             if text is None or ocr_score < self.ocr_confidence:
                 continue
-            combined_score = float(box.conf[0]) * ocr_score
+            combined_score = detection_score * ocr_score
             if combined_score > best_score:
-                best_text, best_score = text, combined_score
-        return best_text
+                best_text, best_box, best_score = text, coordinates, combined_score
+        return best_text, best_box if best_box is not None else fallback_box
 
     __call__ = predict
