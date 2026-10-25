@@ -478,6 +478,9 @@ class MainScreen:
                         ui.html('HIGHWAY<span>HUB</span>', sanitize=False).classes('brand-name')
                         ui.label('DRIVER DISPLAY').classes('brand-sub')
                 ui.label('DRIVE OVERVIEW').classes('topbar-center')
+                ui.button('Camera', icon='videocam',
+                          on_click=lambda: ui.navigate.to('/camera')) \
+                    .props('flat no-caps color=light-green-4').classes('follow-button')
                 #with ui.element('div').classes('preview-pill'):
                 #    ui.element('span').classes('preview-dot')
                 #    ui.label('GPS TELEMETRY')
@@ -646,7 +649,7 @@ class MainScreen:
                     chart.update()
                 previous = current
 
-            ui.timer(0.25, refresh, immediate=False)
+            ui.timer(0.25, refresh)
 
 
 if __name__ == '__main__':
