@@ -12,6 +12,8 @@ from fastapi import HTTPException
 import numpy as np
 
 from camera_stuff.recorder import CameraRecorder
+from camera_stuff.h264_writer import H264VideoWriter
+from camera_stuff.jpeg_frame import JpegFrame
 from camera_stuff.video_library import VideoLibrary
 from webgui.recordings_screen import RecordingsScreen
 
@@ -103,6 +105,25 @@ class VideoLibraryTests(unittest.TestCase):
         with patch('camera_stuff.video_library.cv2.VideoCapture', wraps=cv2.VideoCapture) as capture:
             self.assertIsNotNone(self.library.thumbnail(path.name))
         capture.assert_called_once()
+
+    def test_h264_mp4_supports_thumbnail_download_and_delete(self):
+        self.root.mkdir()
+        path = self.recorder.suggest_path()
+        ok, jpeg = cv2.imencode('.jpg', np.full((120, 160, 3), 80, dtype=np.uint8))
+        self.assertTrue(ok)
+        writer = H264VideoWriter(path, 30, (160, 120), bitrate_kbps=6000)
+        try:
+            writer.write(JpegFrame(jpeg.tobytes(), 160, 120))
+        finally:
+            writer.close()
+        self.assertEqual(self.library.list_videos()[0].name, path.name)
+        response = self.screen.thumbnail_response(path.name)
+        self.assertEqual(response.media_type, 'image/jpeg')
+        thumbnail = cv2.imdecode(np.frombuffer(response.body, dtype=np.uint8), cv2.IMREAD_COLOR)
+        self.assertEqual(thumbnail.shape, (240, 320, 3))
+        self.assertEqual(Path(self.screen.download_response(path.name).path), path)
+        self.library.delete(path.name)
+        self.assertFalse(path.exists())
 
     def test_active_file_cannot_be_downloaded_deleted_or_decoded(self):
         path = self.video()

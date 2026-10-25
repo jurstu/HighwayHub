@@ -11,6 +11,9 @@ import cv2
 import numpy as np
 
 from camera_stuff.recorder import CameraRecorder, MIN_FREE_BYTES
+from camera_stuff.gstreamer import Gst
+from camera_stuff.h264_writer import H264VideoWriter
+from camera_stuff.jpeg_frame import JpegFrame
 
 
 class RecorderTests(unittest.TestCase):
@@ -19,18 +22,23 @@ class RecorderTests(unittest.TestCase):
         self.addCleanup(self.directory.cleanup)
         self.recorder = CameraRecorder(Path(self.directory.name) / 'clips', fps=20)
         self.addCleanup(self.recorder._finish)
-        self.frame = np.full((120, 160, 3), 80, dtype=np.uint8)
+        self.frame = self.jpeg(160, 120)
         self.df = self.enterContext(patch('camera_stuff.recorder.run'))
         self.df.return_value.stdout = 'Filesystem Size Used Avail Use% Mounted on\n/dev/root 100G 10G 90G 10% /\n'
         self.disk = self.enterContext(patch('camera_stuff.recorder.statvfs'))
         self.disk.return_value = Mock(f_bavail=10_000_000_000, f_frsize=1)
 
+    def jpeg(self, width, height):
+        ok, data = cv2.imencode('.jpg', np.full((height, width, 3), 80, dtype=np.uint8))
+        self.assertTrue(ok)
+        return JpegFrame(data.tobytes(), width, height)
+
     def send_frame(self):
-        self.recorder.new_frame_signal.trigger(self.frame)
+        self.recorder.new_jpeg_signal.trigger(self.frame)
         return self.recorder._latest[0]
 
     def test_receives_frames_while_off_without_creating_files(self):
-        with patch('camera_stuff.recorder.cv2.VideoWriter') as writer:
+        with patch('camera_stuff.recorder.H264VideoWriter') as writer:
             self.recorder._tick(self.send_frame())
         writer.assert_not_called()
         self.assertIs(self.recorder._latest[1], self.frame)
@@ -40,15 +48,16 @@ class RecorderTests(unittest.TestCase):
         path = self.recorder.suggest_path()
         self.assertEqual(path.parent, self.recorder.recordings_dir)
         self.assertTrue(path.name.startswith('camera-'))
-        self.assertEqual(path.suffix, '.avi')
+        self.assertEqual(path.suffix, '.mp4')
         self.assertFalse(path.exists())
 
     def test_selected_filename_produces_playable_video(self):
         now = self.send_frame()
-        path = Path(self.directory.name) / 'chosen' / 'drive.avi'
+        path = Path(self.directory.name) / 'chosen' / 'drive.mp4'
         self.recorder.set_recording(True, path)
         for index in range(6):
             self.recorder._tick(now + index * 0.05)
+            sleep(0.05)  # Feed at capture cadence; the encoder intentionally drops overload.
         self.assertEqual(self.recorder.status.path, path)
         self.assertEqual(self.recorder.active_path, path)
         self.recorder.set_recording(False)
@@ -63,12 +72,16 @@ class RecorderTests(unittest.TestCase):
             self.assertEqual(capture.get(cv2.CAP_PROP_FPS), 20)
             ok, frame = capture.read()
             self.assertTrue(ok)
-            self.assertEqual(frame.shape, self.frame.shape)
+            self.assertEqual(frame.shape, (self.frame.height, self.frame.width, 3))
+            codec = int(capture.get(cv2.CAP_PROP_FOURCC)).to_bytes(4, 'little').decode()
+            self.assertIn(codec.lower(), {'avc1', 'h264'})
+            np.testing.assert_allclose(frame[60, 80], [80, 80, 80], atol=5)
+            self.assertNotIn(self.frame.data, path.read_bytes())
         finally:
             capture.release()
 
     def test_existing_file_is_never_overwritten(self):
-        path = Path(self.directory.name) / 'existing.avi'
+        path = Path(self.directory.name) / 'existing.mp4'
         path.write_bytes(b'existing recording')
         self.recorder.set_recording(True, path)
         with patch('camera_stuff.recorder.logger'):
@@ -95,33 +108,31 @@ class RecorderTests(unittest.TestCase):
         self.recorder.set_recording(True)
         self.recorder._tick(now)
         first = self.recorder.status.path
-        self.recorder._latest = (now + 0.1, np.zeros((240, 320, 3), dtype=np.uint8))
+        self.recorder._latest = (now + 0.1, self.jpeg(320, 240))
         self.recorder._tick(now + 0.1)
         self.assertNotEqual(self.recorder.status.path, first)
         self.assertEqual(self.recorder._writer_size, (320, 240))
 
     def test_writer_failure_is_reported_and_partial_file_removed(self):
         now = self.send_frame()
-        writer = Mock()
-        writer.isOpened.return_value = False
         self.recorder.set_recording(True)
         with (
-            patch('camera_stuff.recorder.cv2.VideoWriter', return_value=writer),
+            patch('camera_stuff.recorder.H264VideoWriter', side_effect=OSError('Could not open the recording file')) as writer,
             patch('camera_stuff.recorder.logger'),
         ):
             self.recorder._tick(now)
         self.assertFalse(self.recorder.status.requested)
         self.assertIn('Could not open', self.recorder.status.error)
         self.assertEqual(list(self.recorder.recordings_dir.iterdir()), [])
-        writer.release.assert_called_once()
+        writer.assert_called_once()
         self.recorder.set_recording(True)
         self.recorder._tick(now + 0.05)
         self.assertEqual(self.recorder.status.error, '')
 
     def test_finalization_error_persists_until_next_request(self):
         self.recorder._writer = Mock()
-        self.recorder._writer.release.side_effect = cv2.error('write failed')
-        self.recorder._path = Path(self.directory.name) / 'failed.avi'
+        self.recorder._writer.close.side_effect = OSError('write failed')
+        self.recorder._path = Path(self.directory.name) / 'failed.mp4'
         with patch('camera_stuff.recorder.logger'):
             self.recorder._tick(self.send_frame())
             self.recorder._tick(monotonic())
@@ -161,7 +172,54 @@ class RecorderTests(unittest.TestCase):
             with self.subTest(fps=fps), self.assertRaises(ValueError):
                 CameraRecorder(fps=fps)
         with self.assertRaises(ValueError):
-            self.recorder.set_recording(True, 'clip.mp4')
+            self.recorder.set_recording(True, 'clip.avi')
+        for bitrate in [0, -1, 2_048_001, 1.5, True, float('inf'), float('nan')]:
+            with self.subTest(bitrate=bitrate), self.assertRaises(ValueError):
+                CameraRecorder(bitrate_kbps=bitrate)
+
+    def test_configured_bitrate_reaches_encoder(self):
+        self.recorder.bitrate_kbps = 2500
+        self.recorder.set_recording(True)
+        self.recorder._tick(self.send_frame())
+        encoder = self.recorder._writer._pipeline.get_by_name('h264_encoder')
+        self.assertEqual(encoder.get_property('bitrate'), 2500)
+
+    def test_odd_dimensions_report_error_without_leaving_partial_clip(self):
+        self.frame = self.jpeg(161, 121)
+        self.recorder.set_recording(True)
+        with patch('camera_stuff.recorder.logger'):
+            self.recorder._tick(self.send_frame())
+        self.assertFalse(self.recorder.status.requested)
+        self.assertIn('even frame dimensions', self.recorder.status.error)
+        self.assertEqual(list(self.recorder.recordings_dir.iterdir()), [])
+
+    def test_slow_encoder_bounds_queue_without_blocking_writes(self):
+        path = Path(self.directory.name) / 'overloaded.mp4'
+        parse = Gst.parse_launch
+        with patch('camera_stuff.h264_writer.Gst.parse_launch', side_effect=lambda pipeline:
+                   parse(pipeline.replace('! jpegdec', '! identity sleep-time=100000 ! jpegdec'))):
+            writer = H264VideoWriter(path, 30, (160, 120), bitrate_kbps=6000)
+        try:
+            writer.write(self.frame)
+            deadline = monotonic() + 1
+            while writer._source.get_property('current-level-buffers') and monotonic() < deadline:
+                sleep(0.001)
+            started = monotonic()
+            for _ in range(30):
+                writer.write(self.frame)
+            self.assertLess(monotonic() - started, 0.5)
+            self.assertLessEqual(writer._source.get_property('current-level-buffers'), 2)
+        finally:
+            writer.close()
+        capture = cv2.VideoCapture(str(path))
+        try:
+            frames = 0
+            while capture.read()[0]:
+                frames += 1
+            self.assertGreater(frames, 0)
+            self.assertLessEqual(frames, 3)
+        finally:
+            capture.release()
 
     def test_checks_root_with_df_every_five_seconds_even_while_off(self):
         now = monotonic()

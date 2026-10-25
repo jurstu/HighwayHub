@@ -1,16 +1,16 @@
 """Live JPEG preview and controls; file writing lives in CameraRecorder."""
 
 from math import isfinite
-from threading import Thread
-from time import monotonic, sleep
+from time import monotonic
 
-import cv2
 from nicegui import ui
 from starlette.responses import Response
 
 from camera_stuff.recorder import RecordingStatus
+from camera_stuff.jpeg_frame import JpegFrame
 from logging_setup import get_logger
 from Util import Signal
+from .camera_preview import CameraPreview
 from .main_screen import CSS
 from .page_timer import PageTimer
 
@@ -23,7 +23,7 @@ CAMERA_CSS = """
   grid-template-columns: minmax(0, 1fr) 300px; }
 .camera-view { position: relative; min-height: 0; overflow: hidden; border-radius: 18px;
   border: 1px solid #304248; background: #05090c; }
-.camera-image { width: 100%; height: 100%; }
+.camera-image { width: 100%; height: 100%; object-fit: contain; }
 .camera-overlay { position: absolute; inset: 0; display: flex; align-items: center;
   justify-content: center; flex-direction: column; gap: 12px; color: #829198; }
 .camera-live { position: absolute; top: 18px; left: 18px; z-index: 1; }
@@ -52,31 +52,25 @@ CAMERA_CSS = """
 
 
 class CameraScreen:
-    """Send BGR frames to new_frame_signal; capture callbacks only replace a tuple.
+    """Serve original camera JPEGs; no decoding, resizing or re-encoding.
 
-    A worker encodes one shared JPEG preview. Controls emit a boolean signal;
-    recorder status updates only replace an immutable snapshot. File selection,
-    video encoding and disk I/O belong to the separate recorder.
+    new_jpeg_signal receives JpegFrame packets and replaces a cached tuple.
+    Recording controls emit booleans; recorder status is an immutable snapshot.
     """
 
     def __init__(self, *, fps: float = 30.0):
         if not isfinite(fps) or fps <= 0:
             raise ValueError('fps must be finite and positive')
         self.fps = float(fps)
-        self.new_frame_signal = Signal('new camera preview frame')
-        self.new_frame_signal.addReceiver(self.update_frame)
+        self.new_jpeg_signal = Signal('new original camera preview JPEG')
+        self.new_jpeg_signal.addReceiver(self.update_jpeg)
         self.recording_changed_signal = Signal('camera recording requested')
         self.recording_requested = False
         self._recording_status = RecordingStatus()
-        self._latest = None
         self._preview = None
-        self._encoded_at = None
-        self._thread = None
-        self._stopping = True
 
-    def update_frame(self, frame):
-        """Called on the camera thread; frames must remain read-only."""
-        self._latest = (monotonic(), frame)
+    def update_jpeg(self, frame: JpegFrame):
+        self._preview = (monotonic(), frame.data, (frame.width, frame.height))
 
     def set_recording(self, enabled: bool):
         enabled = bool(enabled)
@@ -89,60 +83,18 @@ class CameraScreen:
         self.recording_requested = status.requested
 
     def start(self):
-        if self._thread is not None and self._thread.is_alive():
-            if self._stopping:
-                raise RuntimeError('camera preview is still stopping')
-            return
-        self._stopping = False
-        logger.debug('Camera preview endpoint=%s format=JPEG target=%.2f FPS', JPEG_PATH, self.fps)
-        self._thread = Thread(target=self._run, name='camera-preview', daemon=True)
-        self._thread.start()
+        logger.debug('Camera preview endpoint=%s format=original JPEG passthrough', JPEG_PATH)
 
     def stop(self):
-        self._stopping = True
-        if self._thread is not None:
-            self._thread.join(5)
-            if self._thread.is_alive():
-                raise TimeoutError('camera preview has not stopped yet')
+        self._preview = None
 
     def jpeg_response(self) -> Response:
-        """Serve cached immutable bytes; every browser shares one JPEG encoder."""
+        """Serve cached immutable bytes; every browser shares the original camera JPEG."""
         preview = self._preview
         headers = {'Cache-Control': 'no-store'}
         if preview is None or monotonic() - preview[0] > 2:
             return Response(status_code=503, headers={**headers, 'Retry-After': '1'})
         return Response(preview[1], media_type='image/jpeg', headers=headers)
-
-    def _tick(self, now):
-        sample = self._latest
-        fresh = sample is not None and now - sample[0] <= 2
-        if not fresh:
-            self._preview = None
-            return
-
-        received_at, frame = sample
-        if received_at != self._encoded_at:
-            try:
-                height, width = frame.shape[:2]
-                preview = frame
-                if width > 960:
-                    preview = cv2.resize(frame, (960, max(1, round(height * 960 / width))),
-                                         interpolation=cv2.INTER_AREA)
-                ok, jpeg = cv2.imencode('.jpg', preview, [cv2.IMWRITE_JPEG_QUALITY, 80])
-                if ok:
-                    self._preview = (received_at, jpeg.tobytes(), (width, height))
-                    self._encoded_at = received_at
-            except cv2.error as exc:
-                logger.warning('Camera preview encoding failed: %s', exc)
-
-    def _run(self):
-        try:
-            while not self._stopping:
-                started = monotonic()
-                self._tick(started)
-                sleep(max(0.001, 1 / self.fps - (monotonic() - started)))
-        finally:
-            self._preview = None
 
     def spawn_gui(self):
         ui.dark_mode().enable()
@@ -164,7 +116,7 @@ class CameraScreen:
 
             with ui.element('div').classes('camera-layout'):
                 with ui.element('section').classes('camera-view'):
-                    image = ui.image().props('no-spinner no-transition fit=contain').classes('camera-image')
+                    image = CameraPreview(JPEG_PATH, fps=self.fps).classes('camera-image')
                     image.set_visibility(False)
                     with ui.element('div').classes('camera-overlay') as waiting:
                         ui.icon('videocam_off', size='48px')
@@ -193,10 +145,7 @@ class CameraScreen:
                 ui.label('HIGHWAYHUB / CAMERA')
                 ui.label('LIVE JPEG · LOCAL VIDEO')
 
-        previous_frame = None
-
         def refresh():
-            nonlocal previous_frame
             preview = self._preview
             connected = preview is not None and monotonic() - preview[0] <= 2
             image.set_visibility(connected)
@@ -207,10 +156,8 @@ class CameraScreen:
                           'LIVE CAMERA' if connected else 'WAITING FOR CAMERA')
             live.classes(add='is-recording' if path else None,
                          remove=None if path else 'is-recording')
-            if connected and preview[0] != previous_frame:
-                image.set_source(f'{JPEG_PATH}?v={preview[0]}')
+            if connected:
                 resolution.set_text(f'{preview[2][0]} × {preview[2][1]}')
-                previous_frame = preview[0]
             switch.set_value(self.recording_requested)
             recording_status.set_text('Recording' if path else
                                       'Waiting for camera' if self.recording_requested else 'Recording off')
@@ -221,4 +168,4 @@ class CameraScreen:
             error.set_text(status.error)
 
         refresh()
-        PageTimer(1 / self.fps, refresh)
+        PageTimer(0.25, refresh)

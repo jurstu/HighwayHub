@@ -1,5 +1,4 @@
 import time
-import cv2
 from Util import printMotd
 from webgui import WebguiRoot
 from data_source_elements import GpsHandler
@@ -20,16 +19,17 @@ class mainClass:
         self.gps.newPositionSignal.addReceiver(self.new_gps)
 
         self.camera = Camera(
-            "/dev/v4l/by-id/usb-Arducam_Technology_Co.__Ltd._Arducam_1080P_Low_Light_UC684-video-index0",
-            (1920, 1080), fps=CAMERA_FPS, fourcc="MJPG", backend=cv2.CAP_V4L2,
+            #"/dev/v4l/by-id/usb-Arducam_Technology_Co.__Ltd._Arducam_1080P_Low_Light_UC684-video-index0",
+            "/dev/video0",
+            (1920, 1080), fps=CAMERA_FPS,
         )
-        self.camera.new_frame_signal.addReceiver(self.handle_new_camera_image)
+        self.camera.new_jpeg_signal.addReceiver(self.handle_new_camera_jpeg)
         self.camera.start()
 
         self.webgui.run()
 
-    def handle_new_camera_image(self, image):
-        self.webgui.new_camera_frame_signal.trigger(image)
+    def handle_new_camera_jpeg(self, jpeg):
+        self.webgui.new_camera_jpeg_signal.trigger(jpeg)
 
     def new_gps(self, parser):
         self.webgui.main_screen.update_gps_status(parser.status)

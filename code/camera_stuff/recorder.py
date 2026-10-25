@@ -9,10 +9,11 @@ from subprocess import run, SubprocessError
 from threading import Thread
 from time import monotonic, sleep
 
-import cv2
-
 from logging_setup import get_logger
 from Util import Signal
+from .gstreamer import GLib
+from .jpeg_frame import JpegFrame
+from .h264_writer import H264VideoWriter
 
 logger = get_logger(__name__)
 RECORDINGS_DIR = Path("~/recordings").expanduser() #Path(__file__).resolve().parents[2] / 'recordings'
@@ -29,10 +30,10 @@ class RecordingStatus:
 
 
 class CameraRecorder:
-    """Own filename selection and VideoWriter on a dedicated thread.
+    """Own filename selection and software H.264/MP4 recording on a dedicated thread.
 
-    new_frame_signal accepts every BGR frame, even while recording is off.
-    set_recording controls writing; an optional .avi path selects the next clip.
+    new_jpeg_signal accepts every original JpegFrame, even while recording is off.
+    set_recording controls writing; an optional .mp4 path selects the next clip.
     suggest_path returns a default filename without creating anything. Existing
     files are never overwritten. Reconnects and size changes create new clips.
 
@@ -42,13 +43,17 @@ class CameraRecorder:
     Check root disk space every five seconds; low space disables recording.
     """
 
-    def __init__(self, recordings_dir: Path = RECORDINGS_DIR, *, fps: float = 30.0):
+    def __init__(self, recordings_dir: Path = RECORDINGS_DIR, *, fps: float = 30.0,
+                 bitrate_kbps: int = 6000):
         if not isfinite(fps) or fps <= 0:
             raise ValueError('fps must be finite and positive')
+        if type(bitrate_kbps) is not int or not 1 <= bitrate_kbps <= 2_048_000:
+            raise ValueError('bitrate_kbps must be an integer from 1 to 2048000')
         self.recordings_dir = Path(recordings_dir)
         self.fps = float(fps)
-        self.new_frame_signal = Signal('new recorder frame')
-        self.new_frame_signal.addReceiver(self.update_frame)
+        self.bitrate_kbps = bitrate_kbps
+        self.new_jpeg_signal = Signal('new recorder JPEG')
+        self.new_jpeg_signal.addReceiver(self.update_jpeg)
         self.status_signal = Signal('camera recording status')
         self.status = RecordingStatus()
         self.active_path = None
@@ -66,17 +71,17 @@ class CameraRecorder:
         self._thread = None
         self._stopping = True
 
-    def update_frame(self, frame):
+    def update_jpeg(self, frame: JpegFrame):
         self._latest = (monotonic(), frame)
 
     def suggest_path(self) -> Path:
-        name = datetime.now(timezone.utc).strftime('camera-%Y%m%dT%H%M%S.%fZ.avi')
+        name = datetime.now(timezone.utc).strftime('camera-%Y%m%dT%H%M%S.%fZ.mp4')
         return self.recordings_dir / name
 
     def set_recording(self, enabled: bool, path: str | Path | None = None):
         selected = Path(path) if path is not None else None
-        if selected is not None and selected.suffix.lower() != '.avi':
-            raise ValueError('recording path must end in .avi')
+        if selected is not None and selected.suffix.lower() != '.mp4':
+            raise ValueError('recording path must end in .mp4')
         if bool(enabled) != self._request[0] or selected is not None:
             self._request = (bool(enabled), selected)
 
@@ -109,8 +114,8 @@ class CameraRecorder:
         writer, self._writer = self._writer, None
         if writer is not None:
             try:
-                writer.release()
-            except cv2.error as exc:
+                writer.close()
+            except (GLib.Error, OSError) as exc:
                 self._request = self._applied_request = (False, None)
                 self._error = f'Could not finalize recording: {exc}'
                 logger.warning('%s', self._error)
@@ -122,7 +127,7 @@ class CameraRecorder:
         self.active_path = None
 
     def _record(self, frame, now):
-        size = (frame.shape[1], frame.shape[0])
+        size = (frame.width, frame.height)
         if self._writer is not None and self._writer_size != size:
             self._finish()
             if not self._request[0]:
@@ -135,15 +140,15 @@ class CameraRecorder:
             with path.open('xb'):  # Reserve exclusively; never truncate an existing clip.
                 pass
             try:
-                self._writer = cv2.VideoWriter(str(path), cv2.VideoWriter_fourcc(*'MJPG'), self.fps, size)
-                if not self._writer.isOpened():
-                    raise OSError('Could not open the recording file')
-            except (cv2.error, OSError):
+                self._writer = H264VideoWriter(path, self.fps, size, bitrate_kbps=self.bitrate_kbps)
+            except (GLib.Error, OSError):
                 self._finish()
                 path.unlink(missing_ok=True)
                 raise
             self._path, self._writer_size, self._started_at = path, size, now
-            logger.debug('Camera recording: %s format=MJPG size=%dx%d FPS=%.2f', path, *size, self.fps)
+            logger.debug('Camera recording: %s backend=GStreamer format=H.264/MP4 encoder=x264enc '
+                         'preset=ultrafast bitrate=%d kbps size=%dx%d FPS=%.2f',
+                         path, self.bitrate_kbps, *size, self.fps)
         self._writer.write(frame)
 
     def _check_space(self, now):
@@ -184,7 +189,7 @@ class CameraRecorder:
         else:
             try:
                 self._record(sample[1], now)
-            except (cv2.error, OSError) as exc:
+            except (GLib.Error, OSError) as exc:
                 self._request = self._applied_request = (False, None)
                 self._error = str(exc)
                 self._finish()
