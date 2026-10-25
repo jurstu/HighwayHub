@@ -15,7 +15,7 @@ from camera_stuff.recorder import CameraRecorder
 from camera_stuff.h264_writer import H264VideoWriter
 from camera_stuff.jpeg_frame import JpegFrame
 from camera_stuff.video_library import VideoLibrary
-from webgui.recordings_screen import RecordingsScreen
+from webgui.recordings_screen import RecordingsScreen, _duration
 
 
 class VideoLibraryTests(unittest.TestCase):
@@ -27,13 +27,14 @@ class VideoLibraryTests(unittest.TestCase):
         self.library = VideoLibrary(self.recorder)
         self.screen = RecordingsScreen(self.library)
 
-    def video(self, name='drive.avi'):
+    def video(self, name='drive.avi', *, frames=1, fps=30):
         self.root.mkdir(exist_ok=True)
         path = self.root / name
-        writer = cv2.VideoWriter(str(path), cv2.VideoWriter_fourcc(*'MJPG'), 30, (160, 120))
+        writer = cv2.VideoWriter(str(path), cv2.VideoWriter_fourcc(*'MJPG'), fps, (160, 120))
         self.assertTrue(writer.isOpened())
         try:
-            writer.write(np.full((120, 160, 3), 80, dtype=np.uint8))
+            for _ in range(frames):
+                writer.write(np.full((120, 160, 3), 80, dtype=np.uint8))
         finally:
             writer.release()
         return path
@@ -65,6 +66,57 @@ class VideoLibraryTests(unittest.TestCase):
         (self.root / 'directory.avi').mkdir()
         (self.root / 'alias.avi').symlink_to(path)
         self.assertEqual([video.name for video in self.library.list_videos()], [path.name])
+
+    def test_duration_sorting_keeps_active_and_unreadable_files_last(self):
+        for name, seconds in [('short.avi', 1), ('long.avi', 3), ('middle.avi', 2)]:
+            self.video(name, frames=10 * seconds, fps=10)
+        self.recorder.active_path = self.video('live.avi')
+        (self.root / 'bad.mp4').write_bytes(b'incomplete video')
+        for order, names in [
+            ('duration_asc', ['short.avi', 'middle.avi', 'long.avi', 'bad.mp4', 'live.avi']),
+            ('duration_desc', ['long.avi', 'middle.avi', 'short.avi', 'bad.mp4', 'live.avi']),
+        ]:
+            with self.subTest(order=order):
+                videos = self.library.list_videos(order)
+                self.assertEqual([video.name for video in videos], names)
+                durations = {video.name: video.duration for video in videos}
+                self.assertEqual(durations, {'short.avi': 1, 'middle.avi': 2, 'long.avi': 3,
+                                             'bad.mp4': None, 'live.avi': None})
+
+    def test_duration_is_cached_until_file_changes_and_removed_on_delete(self):
+        path = self.video(frames=20, fps=10)
+        with patch('camera_stuff.video_library.cv2.VideoCapture', wraps=cv2.VideoCapture) as capture:
+            self.assertEqual(self.library.list_videos()[0].duration, 2)
+            self.assertEqual(self.library.list_videos()[0].duration, 2)
+            capture.assert_called_once()
+            info = path.stat()
+            utime(path, ns=(info.st_atime_ns, info.st_mtime_ns + 1))
+            self.assertEqual(self.library.list_videos()[0].duration, 2)
+            self.assertEqual(capture.call_count, 2)
+        self.library.delete(path.name)
+        self.assertNotIn(str(path), self.library._durations)
+
+    def test_unknown_duration_is_cached_without_decoding_frames(self):
+        self.video()
+        for fps, frames in [(0, 10), (float('nan'), 10), (float('inf'), 10),
+                            (30, 0), (30, float('nan')), (30, float('inf'))]:
+            with self.subTest(fps=fps, frames=frames):
+                self.library._durations.clear()
+                capture = Mock()
+                capture.open.return_value = True
+                capture.get.side_effect = [fps, frames]
+                with patch('camera_stuff.video_library.cv2.VideoCapture', return_value=capture) as factory:
+                    self.assertIsNone(self.library.list_videos()[0].duration)
+                    self.assertIsNone(self.library.list_videos()[0].duration)
+                factory.assert_called_once()
+                capture.read.assert_not_called()
+                capture.release.assert_called_once()
+
+    def test_duration_format_handles_minutes_hours_and_unknown(self):
+        for seconds, expected in [(None, '—'), (0, '00:00'), (15.2, '00:15'),
+                                  (65, '01:05'), (3599.6, '1:00:00'), (3661, '1:01:01')]:
+            with self.subTest(seconds=seconds):
+                self.assertEqual(_duration(seconds), expected)
 
     def test_filename_dates_override_modification_time_for_date_sorting(self):
         self.root.mkdir()
@@ -116,7 +168,9 @@ class VideoLibraryTests(unittest.TestCase):
             writer.write(JpegFrame(jpeg.tobytes(), 160, 120))
         finally:
             writer.close()
-        self.assertEqual(self.library.list_videos()[0].name, path.name)
+        video = self.library.list_videos()[0]
+        self.assertEqual(video.name, path.name)
+        self.assertAlmostEqual(video.duration, 1 / 30)
         response = self.screen.thumbnail_response(path.name)
         self.assertEqual(response.media_type, 'image/jpeg')
         thumbnail = cv2.imdecode(np.frombuffer(response.body, dtype=np.uint8), cv2.IMREAD_COLOR)
@@ -129,12 +183,14 @@ class VideoLibraryTests(unittest.TestCase):
         path = self.video()
         self.recorder.active_path = path
         self.assertIsNone(self.recorder.status.path)  # Status may not have been published yet.
-        self.assertTrue(self.library.list_videos()[0].active)
         with self.assertRaises(PermissionError):
             self.library.completed_file(path.name)
         with self.assertRaises(PermissionError):
             self.library.delete(path.name)
         with patch('camera_stuff.video_library.cv2.VideoCapture') as capture:
+            video = self.library.list_videos()[0]
+            self.assertTrue(video.active)
+            self.assertIsNone(video.duration)
             self.assertIsNone(self.library.thumbnail(path.name))
         capture.assert_not_called()
         self.assertTrue(path.exists())

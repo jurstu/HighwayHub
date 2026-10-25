@@ -34,6 +34,9 @@ RECORDINGS_CSS = '''
 .recording-active { position: absolute; top: 12px; left: 12px; background: #331b1b;
   color: #ff9595; border: 1px solid #703030; border-radius: 99px; padding: 5px 10px;
   font-size: 10px; font-weight: 800; letter-spacing: .1em; }
+.recording-duration { position: absolute; right: 10px; bottom: 10px; padding: 3px 7px;
+  border-radius: 5px; background: #05090cdd; color: #f2f6ee; font-size: 12px;
+  font-weight: 700; font-variant-numeric: tabular-nums; }
 .recording-body { padding: 16px; width: 100%; box-sizing: border-box; }
 .recording-name { color: #f2f6ee; font-size: 13px; font-weight: 750; overflow-wrap: anywhere; }
 .recording-meta { display: flex; justify-content: space-between; gap: 8px; color: #829198;
@@ -58,6 +61,14 @@ def _size(value: int) -> str:
         if number < 1024 or unit == 'TB':
             return f'{number:.1f} {unit}' if unit != 'B' else f'{int(number)} B'
         number /= 1024
+
+
+def _duration(seconds: float | None) -> str:
+    if seconds is None:
+        return '—'
+    hours, rest = divmod(round(seconds), 3600)
+    minutes, seconds = divmod(rest, 60)
+    return f'{hours}:{minutes:02d}:{seconds:02d}' if hours else f'{minutes:02d}:{seconds:02d}'
 
 
 class RecordingsScreen:
@@ -130,6 +141,8 @@ class RecordingsScreen:
                                 'ratio=1.777778 fit=cover loading=lazy no-spinner no-transition')
                             if video.active:
                                 ui.label('RECORDING').classes('recording-active')
+                            ui.label(_duration(video.duration)).classes('recording-duration').tooltip(
+                                'Length available when recording stops' if video.active else 'Video length')
                         with ui.element('div').classes('recording-body'):
                             ui.label(video.name).classes('recording-name')
                             with ui.element('div').classes('recording-meta'):

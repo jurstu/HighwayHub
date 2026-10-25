@@ -19,8 +19,8 @@ class mainClass:
         self.gps.newPositionSignal.addReceiver(self.new_gps)
 
         self.camera = Camera(
-            #"/dev/v4l/by-id/usb-Arducam_Technology_Co.__Ltd._Arducam_1080P_Low_Light_UC684-video-index0",
-            "/dev/video0",
+            "/dev/v4l/by-id/usb-Arducam_Technology_Co.__Ltd._Arducam_1080P_Low_Light_UC684-video-index0",
+            #"/dev/video0",
             (1920, 1080), fps=CAMERA_FPS,
         )
         self.camera.new_jpeg_signal.addReceiver(self.handle_new_camera_jpeg)
