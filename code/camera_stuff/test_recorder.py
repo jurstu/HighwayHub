@@ -50,9 +50,11 @@ class RecorderTests(unittest.TestCase):
         for index in range(6):
             self.recorder._tick(now + index * 0.05)
         self.assertEqual(self.recorder.status.path, path)
+        self.assertEqual(self.recorder.active_path, path)
         self.recorder.set_recording(False)
         self.recorder._tick(now + 0.35)
         self.assertIsNone(self.recorder.status.path)
+        self.assertIsNone(self.recorder.active_path)
         self.assertEqual(self.recorder.status.last_path, path)
         capture = cv2.VideoCapture(str(path))
         try:

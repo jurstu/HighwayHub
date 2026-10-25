@@ -12,6 +12,7 @@ from camera_stuff.recorder import RecordingStatus
 from logging_setup import get_logger
 from Util import Signal
 from .main_screen import CSS
+from .page_timer import PageTimer
 
 logger = get_logger(__name__)
 JPEG_PATH = '/camera/frame.jpg'
@@ -36,6 +37,8 @@ CAMERA_CSS = """
 .camera-file { color: #a7b6b8; font-size: 12px; overflow-wrap: anywhere; }
 .camera-error { color: #ff9595; font-size: 12px; }
 .camera-navigation { border: 1px solid #40554b; border-radius: 10px; color: #c7f879 !important; }
+.camera-topbar { flex: 0 0 auto; min-height: 46px; flex-wrap: wrap; }
+.camera-topbar-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 @media (max-width: 850px), (orientation: portrait) {
   .camera-layout { grid-template-columns: 1fr; grid-template-rows: minmax(200px, 1fr) auto; }
   .camera-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
@@ -145,15 +148,19 @@ class CameraScreen:
         ui.dark_mode().enable()
         ui.add_css(CSS + CAMERA_CSS)
         with ui.element('main').classes('dashboard'):
-            with ui.element('header').classes('topbar'):
+            with ui.element('header').classes('topbar camera-topbar'):
                 with ui.element('div').classes('brand'):
                     ui.label('H').classes('brand-mark')
                     with ui.element('div'):
                         ui.html('HIGHWAY<span>HUB</span>', sanitize=False).classes('brand-name')
                         ui.label('CAMERA VIEW').classes('brand-sub')
-                ui.button('Back to dashboard', icon='arrow_back',
-                          on_click=lambda: ui.navigate.to('/main_navigation_screen')) \
-                    .props('flat no-caps color=light-green-4').classes('camera-navigation')
+                with ui.element('div').classes('camera-topbar-actions'):
+                    ui.button('Recordings', icon='video_library',
+                              on_click=lambda: ui.navigate.to('/camera/recordings')) \
+                        .props('flat no-caps color=light-green-4').classes('camera-navigation')
+                    ui.button('Back to dashboard', icon='arrow_back',
+                              on_click=lambda: ui.navigate.to('/main_navigation_screen')) \
+                        .props('flat no-caps color=light-green-4').classes('camera-navigation')
 
             with ui.element('div').classes('camera-layout'):
                 with ui.element('section').classes('camera-view'):
@@ -214,4 +221,4 @@ class CameraScreen:
             error.set_text(status.error)
 
         refresh()
-        ui.timer(1 / self.fps, refresh)
+        PageTimer(1 / self.fps, refresh)

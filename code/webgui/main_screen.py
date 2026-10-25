@@ -11,6 +11,11 @@ from typing import Any, Iterable
 
 from nicegui import ui
 
+if __package__:
+    from .page_timer import PageTimer
+else:
+    from page_timer import PageTimer
+
 
 CSS = """
 html, body, #app { width: 100%; height: 100%; margin: 0; overflow: hidden; }
@@ -649,7 +654,7 @@ class MainScreen:
                     chart.update()
                 previous = current
 
-            ui.timer(0.25, refresh)
+            PageTimer(0.25, refresh)
 
 
 if __name__ == '__main__':

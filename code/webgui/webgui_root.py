@@ -1,9 +1,11 @@
 from nicegui import ui, app
 from .main_screen import MainScreen
 from .camera_screen import CameraScreen, CAMERA_PATH, JPEG_PATH
+from .recordings_screen import RecordingsScreen, RECORDINGS_PATH, DOWNLOAD_PATH, THUMBNAIL_PATH
 
 import threading
 from camera_stuff import CameraRecorder
+from camera_stuff.video_library import VideoLibrary
 from Util import Signal
 
 class WebguiRoot:
@@ -17,6 +19,7 @@ class WebguiRoot:
         self.main_screen = MainScreen()
         self.camera_screen = CameraScreen(fps=camera_fps)
         self.recorder = recorder if recorder is not None else CameraRecorder(fps=camera_fps)
+        self.recordings_screen = RecordingsScreen(VideoLibrary(self.recorder))
         self.new_camera_frame_signal = Signal('new camera frame for preview and recorder')
         self.new_camera_frame_signal.addReceiver(self.camera_screen.new_frame_signal.trigger)
         self.new_camera_frame_signal.addReceiver(self.recorder.new_frame_signal.trigger)
@@ -24,6 +27,8 @@ class WebguiRoot:
         self.recorder.status_signal.addReceiver(self.camera_screen.update_recording_status)
         self.camera_screen.update_recording_status(self.recorder.status)
         app.get(JPEG_PATH)(self.camera_screen.jpeg_response)
+        app.get(DOWNLOAD_PATH)(self.recordings_screen.download_response)
+        app.get(THUMBNAIL_PATH)(self.recordings_screen.thumbnail_response)
         app.on_startup(self.camera_screen.start)
         app.on_startup(self.recorder.start)
         app.on_shutdown(self.camera_screen.stop)
@@ -47,4 +52,5 @@ class WebguiRoot:
                         '/': self.main_screen.spawn_gui,
                         "/main_navigation_screen": self.main_screen.spawn_gui,
                         CAMERA_PATH: self.camera_screen.spawn_gui,
+                        RECORDINGS_PATH: self.recordings_screen.spawn_gui,
                       })

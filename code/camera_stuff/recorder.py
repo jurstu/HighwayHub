@@ -51,6 +51,7 @@ class CameraRecorder:
         self.new_frame_signal.addReceiver(self.update_frame)
         self.status_signal = Signal('camera recording status')
         self.status = RecordingStatus()
+        self.active_path = None
         self._latest = None
         self._request = (False, None)
         self._applied_request = self._request
@@ -118,6 +119,7 @@ class CameraRecorder:
                     logger.debug('Camera recording closed: %s', self._path)
                     self._last_path = self._path
                 self._path = None
+        self.active_path = None
 
     def _record(self, frame, now):
         size = (frame.shape[1], frame.shape[0])
@@ -128,6 +130,7 @@ class CameraRecorder:
         if self._writer is None:
             path = self._selected_path or self.suggest_path()
             self._selected_path = None
+            self.active_path = path
             path.parent.mkdir(parents=True, exist_ok=True)
             with path.open('xb'):  # Reserve exclusively; never truncate an existing clip.
                 pass
