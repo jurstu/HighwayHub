@@ -101,7 +101,7 @@ class CameraTests(unittest.TestCase):
 
     def test_measures_delivered_fps_instead_of_trusting_driver(self):
         capture = self.capture(np.zeros((24, 32, 3), dtype=np.uint8))
-        camera = Camera(resolution=(32, 24))
+        camera = Camera(resolution=(32, 24), report_fps=True)
         count = 0
 
         def receive(frame):

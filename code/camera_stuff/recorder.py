@@ -149,8 +149,7 @@ class CameraRecorder:
         self._next_space_check = now + 5
         previous = self._space_error
         try:
-            result = run(['df', '-h', '/'], capture_output=True, text=True, check=True, timeout=1)
-            logger.debug('Root filesystem space:\n%s', result.stdout.strip())
+            run(['df', '-h', '/'], capture_output=True, text=True, check=True, timeout=1)
             # df -h rounds its output; use exact bytes for the 1 GB threshold.
             fs = statvfs('/')
             available = fs.f_bavail * fs.f_frsize
@@ -158,11 +157,8 @@ class CameraRecorder:
                                  if available < MIN_FREE_BYTES else '')
         except (OSError, SubprocessError) as exc:
             self._space_error = f'Recording stopped: could not check root disk space: {exc}'
-        if self._space_error != previous:
-            if self._space_error:
-                logger.warning('%s', self._space_error)
-            elif self._error == previous:
-                self._error = ''
+        if previous and not self._space_error and self._error == previous:
+            self._error = ''
 
     def _tick(self, now):
         request = self._request

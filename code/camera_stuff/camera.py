@@ -22,7 +22,7 @@ class Camera:
     Only the capture thread touches VideoCapture. No locks or frame queues.
 
     fps requests a hardware rate; fourcc="MJPG" avoids slow uncompressed USB
-    modes on cameras that support it. Negotiated and measured rates are logged.
+    modes on cameras that support it. report_fps enables periodic timing logs.
     buffers controls driver buffers; one can starve capture during MJPEG decode.
 
     A GStreamer source must end in ``appsink drop=true max-buffers=1 sync=false``
@@ -37,6 +37,7 @@ class Camera:
         fps: float = 30.0,
         fourcc: str | None = None,
         buffers: int = 10,
+        report_fps: bool = False,
         backend: int = cv2.CAP_ANY,
         reconnect_delay: float = 1.0,
     ):
@@ -55,6 +56,7 @@ class Camera:
         self.fps = float(fps)
         self.fourcc = fourcc
         self.buffers = buffers
+        self.report_fps = report_fps
         self.measured_fps = 0.0
         self.backend = backend
         self.reconnect_delay = reconnect_delay
@@ -145,10 +147,11 @@ class Camera:
                     processing_seconds += now - read_done
                     if now - measured_at >= 5:
                         self.measured_fps = frames / (now - measured_at)
-                        logger.debug("Camera %r: delivered %.2f FPS; read/decode=%.2f ms/frame; "
-                                     "resize/signals=%.2f ms/frame",
-                                     self.source, self.measured_fps, read_seconds * 1000 / frames,
-                                     processing_seconds * 1000 / frames)
+                        if self.report_fps:
+                            logger.debug("Camera %r: delivered %.2f FPS; read/decode=%.2f ms/frame; "
+                                         "resize/signals=%.2f ms/frame",
+                                         self.source, self.measured_fps, read_seconds * 1000 / frames,
+                                         processing_seconds * 1000 / frames)
                         frames, measured_at = 0, now
                         read_seconds = processing_seconds = 0.0
             except (cv2.error, OSError) as exc:
